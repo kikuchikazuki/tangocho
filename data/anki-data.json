@@ -1,0 +1,10 @@
+{
+  "pages": [
+    {
+      "id": "my-notebook",
+      "name": "自分の単語帳",
+      "cards": []
+    }
+  ],
+  "activePageId": "my-notebook"
+}

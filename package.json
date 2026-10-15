@@ -1,0 +1,27 @@
+{
+  "name": "単語帳",
+  "scripts": {
+    "dev": "vite",
+    "server": "node server/server.js",
+    "migrate:cloud": "node scripts/migrate-to-supabase.mjs",
+    "build": "tsc -b && vite build",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.117.2",
+    "@testing-library/jest-dom": "latest",
+    "@testing-library/react": "latest",
+    "@vitejs/plugin-react": "latest",
+    "jsdom": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "typescript": "latest",
+    "vite": "latest",
+    "vitest": "latest"
+  },
+  "devDependencies": {
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "prettier": "^3.9.6"
+  }
+}

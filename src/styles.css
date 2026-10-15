@@ -1,0 +1,331 @@
+:root {
+  font-family: Inter, system-ui, sans-serif;
+  color: #172033;
+  background: #f5f7fb;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+.app {
+  max-width: 1100px;
+  margin: auto;
+  padding: 28px 20px 60px;
+}
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 20px;
+}
+h1 {
+  font-size: clamp(2rem, 5vw, 4rem);
+  line-height: 1;
+  margin: 4px 0 22px;
+  letter-spacing: -0.06em;
+}
+.eyebrow {
+  color: #64748b;
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  font-weight: 800;
+  margin: 0;
+}
+.add-page,
+.toolbar button,
+.paste button {
+  border: 0;
+  border-radius: 12px;
+  padding: 12px 16px;
+  background: #172033;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+.add-page {
+  background: #ff5c35;
+}
+.header-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.delete-page,
+.delete-card {
+  border: 1px solid #f0b8ad;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #fff4f1;
+  color: #b42318;
+  font-weight: 700;
+  cursor: pointer;
+}
+.delete-card {
+  padding: 8px 10px;
+  font-size: 0.75rem;
+}
+.tabs {
+  display: flex;
+  gap: 8px;
+  overflow: auto;
+  margin-bottom: 18px;
+}
+.tabs button {
+  border: 1px solid #d9deea;
+  background: white;
+  padding: 12px 18px;
+  border-radius: 999px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.tabs .active {
+  background: #172033;
+  color: white;
+}
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 22px;
+}
+.toolbar button {
+  background: #fff;
+  color: #172033;
+  border: 1px solid #d9deea;
+  font-size: 0.8rem;
+}
+.paste {
+  background: #fff;
+  border: 1px solid #e4e8f0;
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 26px;
+  box-shadow: 0 10px 30px #1720330b;
+}
+.paste h2 {
+  margin: 0 0 6px;
+  font-size: 1.1rem;
+}
+.paste p {
+  color: #64748b;
+  margin: 0 0 12px;
+  font-size: 0.9rem;
+}
+.paste textarea {
+  display: block;
+  width: 100%;
+  min-height: 100px;
+  border: 1px solid #d9deea;
+  border-radius: 12px;
+  padding: 12px;
+  font: inherit;
+  margin-bottom: 12px;
+  resize: vertical;
+}
+.paste button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.message {
+  margin-left: 12px;
+  color: #17804e;
+  font-size: 0.9rem;
+}
+.legend,
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.legend {
+  padding: 0 16px 8px;
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.row {
+  background: #fff;
+  border: 1px solid #e4e8f0;
+  border-radius: 16px;
+  padding: 12px;
+  margin-bottom: 10px;
+  box-shadow: 0 5px 18px #17203308;
+}
+.cell {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+}
+.answer {
+  flex: 1;
+  text-align: left;
+  min-height: 48px;
+  border: 0;
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: #eef2ff;
+  color: #172033;
+  font: inherit;
+  cursor: pointer;
+}
+.answer.hidden {
+  background: #172033;
+  color: #fff;
+  text-align: center;
+}
+.progress {
+  display: flex;
+  gap: 2px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  padding: 8px;
+}
+.progress span {
+  color: #cbd5e1;
+  font-size: 0.7rem;
+}
+.progress span.done {
+  color: #ff5c35;
+}
+@media (max-width: 650px) {
+  .app {
+    padding: 20px 12px 40px;
+  }
+  header {
+    align-items: start;
+    flex-direction: column;
+  }
+  .add-page {
+    width: 100%;
+  }
+  .header-actions {
+    width: 100%;
+  }
+  .delete-page {
+    flex: 1;
+  }
+  .legend,
+  .row {
+    grid-template-columns: 1fr;
+  }
+  .legend span:nth-child(2) {
+    display: none;
+  }
+  .cell {
+    gap: 4px;
+  }
+  .toolbar button {
+    flex: 1;
+  }
+  .message {
+    display: block;
+    margin: 10px 0 0;
+  }
+}
+.count {
+  color: #64748b;
+  margin-top: -14px;
+  margin-bottom: 18px;
+}
+.count strong {
+  color: #ff5c35;
+  font-size: 1.5rem;
+}
+.duplicates {
+  background: #fff4f1;
+  border: 1px solid #ffd5ca;
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 22px;
+}
+.duplicate {
+  background: #fff;
+  border: 1px solid #f0d8d1;
+  border-radius: 10px;
+  padding: 12px;
+  margin: 10px 0;
+}
+.duplicate label {
+  display: flex;
+  gap: 8px;
+  padding: 8px 0;
+}
+.danger {
+  background: #d93427;
+  color: #fff;
+  border: 0;
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.danger:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* スマホでは、読む・押す操作を優先して全体を大きくします。 */
+@media (max-width: 650px) {
+  body {
+    font-size: 17px;
+  }
+  .app {
+    padding: 24px 14px 56px;
+  }
+  h1 {
+    font-size: 3.2rem;
+  }
+  .eyebrow {
+    font-size: 0.8rem;
+  }
+  .add-page,
+  .toolbar button,
+  .paste button,
+  .tabs button {
+    min-height: 52px;
+    padding: 14px 18px;
+    font-size: 1rem;
+  }
+  .toolbar {
+    gap: 10px;
+  }
+  .toolbar button {
+    flex: 1 1 100%;
+  }
+  .paste {
+    padding: 22px 18px;
+  }
+  .paste h2 {
+    font-size: 1.35rem;
+  }
+  .paste textarea {
+    min-height: 150px;
+    padding: 15px;
+    font-size: 1.05rem;
+  }
+  .row {
+    padding: 16px;
+    gap: 16px;
+  }
+  .cell {
+    gap: 10px;
+  }
+  .answer {
+    min-height: 64px;
+    padding: 16px;
+    font-size: 1.05rem;
+  }
+  .progress {
+    padding: 12px 8px;
+  }
+  .progress span {
+    font-size: 1rem;
+  }
+}
