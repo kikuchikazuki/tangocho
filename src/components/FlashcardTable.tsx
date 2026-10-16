@@ -20,7 +20,7 @@ export default function FlashcardTable({
             const shown = s === "left" ? c.leftReveal : c.rightReveal;
             const prog = s === "left" ? c.leftProgress : c.rightProgress;
             return (
-              <div className="cell" key={s}>
+              <div className="cell" data-side={s} key={s}>
                 <button
                   className={shown ? "answer" : "answer hidden"}
                   onClick={() => onReveal(c.id, s)}
