@@ -1,4 +1,5 @@
 import type { AppState, Page, Side } from "./types";
+import { removePageCompletionRecords } from "./calendar";
 import { parseCards } from "./parser";
 // HTTPSでないスマホ環境でも動くよう、簡易IDを予備にします。
 const id = () =>
@@ -15,7 +16,11 @@ export const deleteCard = (page: Page, cardId: string): Page => ({
 });
 export const deletePage = (state: AppState, pageId: string): AppState => {
   const pages = state.pages.filter((page) => page.id !== pageId);
-  return { pages, activePageId: pages[0]?.id ?? "" };
+  return {
+    pages,
+    activePageId: pages[0]?.id ?? "",
+    completionRecords: removePageCompletionRecords(state.completionRecords, pageId),
+  };
 };
 export const appendCards = (page: Page, input: string) => {
   const parsed = parseCards(input);

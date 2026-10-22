@@ -21,6 +21,7 @@ const rows = [
 ];
 export const createInitialState = (): AppState => ({
   activePageId: "aws",
+  completionRecords: [],
   pages: [
     {
       id: "aws",

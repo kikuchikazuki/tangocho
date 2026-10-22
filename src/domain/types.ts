@@ -10,4 +10,9 @@ export type Card = {
   rightProgress: Progress;
 };
 export type Page = { id: string; name: string; cards: Card[] };
-export type AppState = { pages: Page[]; activePageId: string };
+export type CompletionRecord = { date: string; pageId: string };
+export type AppState = {
+  pages: Page[];
+  activePageId: string;
+  completionRecords: CompletionRecord[];
+};

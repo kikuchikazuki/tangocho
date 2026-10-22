@@ -36,10 +36,29 @@ describe("deletion operations", () => {
     const state = {
       pages: [page("a", "A"), page("b", "B")],
       activePageId: "a",
+      completionRecords: [],
     };
     expect(deletePage(state, "a")).toEqual({
       pages: [page("b", "B")],
       activePageId: "b",
+      completionRecords: [],
+    });
+  });
+
+  it("removes completion records for a deleted page", () => {
+    const state = {
+      pages: [page("a", "A"), page("b", "B")],
+      activePageId: "a",
+      completionRecords: [
+        { date: "2026-10-22", pageId: "a" },
+        { date: "2026-10-23", pageId: "b" },
+      ],
+    };
+
+    expect(deletePage(state, "a")).toEqual({
+      pages: [page("b", "B")],
+      activePageId: "b",
+      completionRecords: [{ date: "2026-10-23", pageId: "b" }],
     });
   });
 });
