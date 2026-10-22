@@ -19,8 +19,18 @@ import {
 } from "./domain/state";
 import { findDuplicateGroups } from "./domain/duplicates";
 import FlashcardTable from "./components/FlashcardTable";
+import CalendarView from "./components/CalendarView";
+import {
+  isPageCompleted,
+  localDateKey,
+  toggleCompletionRecord,
+} from "./domain/calendar";
 
-const emptyState: AppState = { pages: [], activePageId: "" };
+const emptyState: AppState = {
+  pages: [],
+  activePageId: "",
+  completionRecords: [],
+};
 
 export default function App() {
   const [state, setState] = useState<AppState>(emptyState);
@@ -32,6 +42,7 @@ export default function App() {
   const [message, setMessage] = useState("");
   const [showDuplicates, setShowDuplicates] = useState(false);
   const [selected, setSelected] = useState<string[]>([]);
+  const [view, setView] = useState<"decks" | "calendar">("decks");
   const importInput = useRef<HTMLInputElement>(null);
   const localRevision = useRef(0);
   const savedRevision = useRef(0);
@@ -65,16 +76,22 @@ export default function App() {
           return;
         }
         const firstPage = createPage("自分の単語帳");
-        setState({ pages: [firstPage], activePageId: firstPage.id });
+        setState({
+          pages: [firstPage],
+          activePageId: firstPage.id,
+          completionRecords: [],
+        });
         setServerReady(true);
       })
       .catch(() => {
         const firstPage = createPage("自分の単語帳");
-        setState({ pages: [firstPage], activePageId: firstPage.id });
+        setState({
+          pages: [firstPage],
+          activePageId: firstPage.id,
+          completionRecords: [],
+        });
         setServerReady(true);
-        setMessage(
-          "クラウドにデータがないため、空の単語帳を作成しました。",
-        );
+        setMessage("クラウドにデータがないため、空の単語帳を作成しました。");
       })
       .catch((error: unknown) => {
         setServerReady(false);
@@ -93,7 +110,8 @@ export default function App() {
       .catch(() => undefined)
       .then(() => saveCloudState(state))
       .then(() => {
-        if (localRevision.current === revision) savedRevision.current = revision;
+        if (localRevision.current === revision)
+          savedRevision.current = revision;
       })
       .catch((error: unknown) =>
         setMessage(
@@ -110,7 +128,8 @@ export default function App() {
       if (localRevision.current !== savedRevision.current) return;
       loadCloudState()
         .then((remote) => {
-          if (!remote || localRevision.current !== savedRevision.current) return;
+          if (!remote || localRevision.current !== savedRevision.current)
+            return;
           // 問題データは同期しますが、選択中ページは端末ごとに維持します。
           setState((current) => ({
             ...remote,
@@ -162,6 +181,13 @@ export default function App() {
       </div>
     );
 
+  const today = localDateKey(new Date());
+  const todayCompleted = isPageCompleted(
+    state.completionRecords,
+    today,
+    page.id,
+  );
+
   function updatePage(fn: (current: typeof page) => typeof page) {
     applyLocalState((current) => ({
       ...current,
@@ -174,6 +200,17 @@ export default function App() {
   function applyLocalState(updater: (current: AppState) => AppState) {
     localRevision.current += 1;
     setState(updater);
+  }
+
+  function toggleCompletion(date: string, pageId: string) {
+    applyLocalState((current) => ({
+      ...current,
+      completionRecords: toggleCompletionRecord(
+        current.completionRecords,
+        date,
+        pageId,
+      ),
+    }));
   }
 
   function addPage() {
@@ -296,21 +333,33 @@ export default function App() {
           <button className="delete-page" onClick={removePage}>
             この暗記帳を削除
           </button>
-          <button onClick={() => void supabase?.auth.signOut()}>ログアウト</button>
+          <button onClick={() => void supabase?.auth.signOut()}>
+            ログアウト
+          </button>
         </div>
       </header>
       <nav className="tabs">
         {state.pages.map((item) => (
           <button
-            className={item.id === page.id ? "active" : ""}
-            onClick={() =>
-              applyLocalState((current) => ({ ...current, activePageId: item.id }))
-            }
+            className={view === "decks" && item.id === page.id ? "active" : ""}
+            onClick={() => {
+              setView("decks");
+              applyLocalState((current) => ({
+                ...current,
+                activePageId: item.id,
+              }));
+            }}
             key={item.id}
           >
             {item.name}
           </button>
         ))}
+        <button
+          className={view === "calendar" ? "active" : ""}
+          onClick={() => setView("calendar")}
+        >
+          カレンダー
+        </button>
       </nav>
       <section className="toolbar">
         <button onClick={exportData}>データを書き出す</button>
@@ -345,79 +394,99 @@ export default function App() {
         <button onClick={() => setShowDuplicates((value) => !value)}>
           重複チェック {groups.length ? `(${groups.length})` : ""}
         </button>
-      </section>
-      {showDuplicates && (
-        <section className="duplicates">
-          <h2>重複・類似問題の確認</h2>
-          {!groups.length && <p>候補はありません。</p>}
-          {groups.map((group, index) => (
-            <div
-              className="duplicate"
-              key={`${group.cards[0].id}-${group.cards[1].id}`}
-            >
-              <b>
-                候補 {index + 1}（類似度 {Math.round(group.score * 100)}%）
-              </b>
-              {group.cards.map((card) => (
-                <label key={card.id}>
-                  <input
-                    type="checkbox"
-                    checked={selected.includes(card.id)}
-                    onChange={(event) =>
-                      setSelected((current) =>
-                        event.target.checked
-                          ? [...current, card.id]
-                          : current.filter((id) => id !== card.id),
-                      )
-                    }
-                  />
-                  <span>
-                    {card.left} = {card.right}
-                  </span>
-                </label>
-              ))}
-            </div>
-          ))}
-          {groups.length > 0 && (
-            <button
-              className="danger"
-              onClick={deleteSelected}
-              disabled={!selected.length}
-            >
-              選択した問題を削除
-            </button>
-          )}
-        </section>
-      )}
-      <section className="paste">
-        <h2>問題をまとめて追加</h2>
-        <p>「左の項目 = 右の説明」を1行ずつ貼り付けてください。</p>
-        <textarea
-          value={paste}
-          onChange={(event) => setPaste(event.target.value)}
-          placeholder="AWS Backup = バックアップ"
-        />
-        <button onClick={addCards} disabled={!paste.trim()}>
-          この暗記帳に追加
+        <button
+          className={
+            todayCompleted ? "complete-button completed" : "complete-button"
+          }
+          onClick={() => toggleCompletion(today, page.id)}
+          aria-pressed={todayCompleted}
+        >
+          {todayCompleted ? "今日の学習を完了済み" : "今日の学習を完了"}
         </button>
-        {message && <span className="message">{message}</span>}
       </section>
-      <div className="legend">
-        <span>左の項目</span>
-        <span>右の説明</span>
-      </div>
-      <FlashcardTable
-        page={page}
-        onReveal={(id, side) =>
-          updatePage((current) => toggleCardReveal(current, id, side))
-        }
-        onProgress={(id, side, value) =>
-          updatePage((current) =>
-            updateProgress(current, id, side, value as Progress),
-          )
-        }
-        onDelete={removeCard}
-      />
+      {view === "calendar" ? (
+        <CalendarView
+          pages={state.pages}
+          completionRecords={state.completionRecords}
+          today={today}
+          onToggleCompletion={toggleCompletion}
+        />
+      ) : (
+        <>
+          {showDuplicates && (
+            <section className="duplicates">
+              <h2>重複・類似問題の確認</h2>
+              {!groups.length && <p>候補はありません。</p>}
+              {groups.map((group, index) => (
+                <div
+                  className="duplicate"
+                  key={`${group.cards[0].id}-${group.cards[1].id}`}
+                >
+                  <b>
+                    候補 {index + 1}（類似度 {Math.round(group.score * 100)}%）
+                  </b>
+                  {group.cards.map((card) => (
+                    <label key={card.id}>
+                      <input
+                        type="checkbox"
+                        checked={selected.includes(card.id)}
+                        onChange={(event) =>
+                          setSelected((current) =>
+                            event.target.checked
+                              ? [...current, card.id]
+                              : current.filter((id) => id !== card.id),
+                          )
+                        }
+                      />
+                      <span>
+                        {card.left} = {card.right}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              ))}
+              {groups.length > 0 && (
+                <button
+                  className="danger"
+                  onClick={deleteSelected}
+                  disabled={!selected.length}
+                >
+                  選択した問題を削除
+                </button>
+              )}
+            </section>
+          )}
+          <section className="paste">
+            <h2>問題をまとめて追加</h2>
+            <p>「左の項目 = 右の説明」を1行ずつ貼り付けてください。</p>
+            <textarea
+              value={paste}
+              onChange={(event) => setPaste(event.target.value)}
+              placeholder="AWS Backup = バックアップ"
+            />
+            <button onClick={addCards} disabled={!paste.trim()}>
+              この暗記帳に追加
+            </button>
+            {message && <span className="message">{message}</span>}
+          </section>
+          <div className="legend">
+            <span>左の項目</span>
+            <span>右の説明</span>
+          </div>
+          <FlashcardTable
+            page={page}
+            onReveal={(id, side) =>
+              updatePage((current) => toggleCardReveal(current, id, side))
+            }
+            onProgress={(id, side, value) =>
+              updatePage((current) =>
+                updateProgress(current, id, side, value as Progress),
+              )
+            }
+            onDelete={removeCard}
+          />
+        </>
+      )}
     </div>
   );
 }
