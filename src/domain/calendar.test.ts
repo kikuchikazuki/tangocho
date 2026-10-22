@@ -45,11 +45,24 @@ describe("calendar completion records", () => {
     expect(localDateKey(new Date(2026, 9, 22, 23, 30))).toBe("2026-10-22");
   });
 
+  it("pads years below 100 when formatting local dates", () => {
+    const date = new Date(0);
+    date.setFullYear(99, 9, 22);
+    expect(localDateKey(date)).toBe("0099-10-22");
+  });
+
   it("creates a complete six-week grid for month boundaries", () => {
     const days = getMonthDays(2026, 9);
     expect(days).toHaveLength(42);
     expect(days.some((day) => day.date === "2026-10-01" && day.inMonth)).toBe(true);
     expect(days.some((day) => day.date === "2026-09-27" && !day.inMonth)).toBe(true);
+  });
+
+  it("creates month days in the requested year below 100", () => {
+    const days = getMonthDays(99, 9);
+    expect(days).toHaveLength(42);
+    expect(days.some((day) => day.date === "0099-10-01" && day.inMonth)).toBe(true);
+    expect(days.every((day) => !day.date.startsWith("19"))).toBe(true);
   });
 
   it("removes only records belonging to a deleted page", () => {

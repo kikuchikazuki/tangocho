@@ -8,9 +8,15 @@ export type CalendarDay = {
 
 const pad = (value: number) => String(value).padStart(2, "0");
 const datePattern = /^(\d{4})-(\d{2})-(\d{2})$/;
+const createLocalDate = (year: number, month: number, day: number): Date => {
+  const date = new Date(0);
+  date.setHours(0, 0, 0, 0);
+  date.setFullYear(year, month, day);
+  return date;
+};
 
 export function localDateKey(date: Date): string {
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+  return `${String(date.getFullYear()).padStart(4, "0")}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
 
 export function isValidDateKey(value: string): boolean {
@@ -27,8 +33,8 @@ export function isValidDateKey(value: string): boolean {
 }
 
 export function getMonthDays(year: number, month: number): CalendarDay[] {
-  const first = new Date(year, month, 1);
-  const start = new Date(year, month, 1 - first.getDay());
+  const first = createLocalDate(year, month, 1);
+  const start = createLocalDate(year, month, 1 - first.getDay());
   return Array.from({ length: 42 }, (_, index) => {
     const date = new Date(start);
     date.setDate(start.getDate() + index);
