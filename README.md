@@ -55,14 +55,16 @@ src/
 ├─ styles.css                 画面の見た目
 ├─ components/
 │  ├─ FlashcardTable.tsx      問題一覧と左右の表示
-│  └─ ProgressCycle.tsx       3段階進捗の表示と更新
+│  ├─ ProgressCycle.tsx       3段階進捗の表示と更新
+│  └─ CalendarView.tsx        カレンダーと日別の完了記録の編集
 ├─ domain/
 │  ├─ types.ts                データの型
 │  ├─ initialData.ts          初期AWSデータ
 │  ├─ parser.ts               貼り付けテキストの変換
 │  ├─ state.ts                問題追加・表示・削除の処理
 │  ├─ progress.ts             進捗の循環処理
-│  └─ duplicates.ts           重複・類似問題の検索
+│  ├─ duplicates.ts           重複・類似問題の検索
+│  └─ calendar.ts             日付表示と完了記録の処理
 └─ storage/
    └─ storage.ts              localStorageへの保存と読み込み
 ```
@@ -109,6 +111,15 @@ VITE_SUPABASE_ANON_KEY=your-anon-key
 
 5. `npm.cmd run dev` で起動します。
 6. 画面から新規登録してログインします。
+
+## カレンダーで学習完了を記録する
+
+1. 「カレンダー」タブを開きます。
+2. 単語帳を選び、「今日の学習を完了」を押すと、今日の日付に完了記録が付きます。
+3. カレンダーで日付を選ぶと、複数の単語帳それぞれについて完了・未完了を切り替えられます。
+4. 「前の月」「次の月」で過去の日付を確認し、記録を編集できます。
+
+完了記録はほかのデータと同じクラウド上の状態に保存され、JSONバックアップにも含まれます。記録は日付と単語帳の組み合わせごとに独立しています。
 
 ## 既存データの移行
 
