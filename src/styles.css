@@ -368,6 +368,97 @@ h1 {
   cursor: not-allowed;
 }
 
+.calendar {
+  background: #fff;
+  border: 1px solid #e4e8f0;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 10px 30px #1720330b;
+}
+.calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.calendar-header button,
+.calendar-day,
+.completion-toggle {
+  border: 1px solid #d9deea;
+  border-radius: 10px;
+  background: #fff;
+  color: #172033;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+}
+.calendar-header button {
+  min-height: 44px;
+  padding: 8px 12px;
+}
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+.calendar-weekday {
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 6px;
+  text-align: center;
+}
+.calendar-day {
+  min-height: 52px;
+  padding: 8px;
+  text-align: left;
+}
+.calendar-day.has-completion {
+  background: #ffded4;
+  border-color: #ff5c35;
+}
+.calendar-day.outside-month {
+  color: #aab4c4;
+  background: #f8fafc;
+}
+.calendar-day.selected {
+  outline: 3px solid #172033;
+  outline-offset: 1px;
+}
+.completion-editor {
+  border-top: 1px solid #e4e8f0;
+  margin-top: 20px;
+  padding-top: 18px;
+}
+.completion-list {
+  display: grid;
+  gap: 8px;
+}
+.completion-toggle {
+  min-height: 48px;
+  padding: 12px 14px;
+  text-align: left;
+}
+.completion-toggle.completed {
+  background: #172033;
+  border-color: #172033;
+  color: #fff;
+}
+@media (max-width: 650px) {
+  .calendar {
+    padding: 14px;
+    border-radius: 16px;
+  }
+  .calendar-grid {
+    gap: 4px;
+  }
+  .calendar-day {
+    min-height: 44px;
+    padding: 6px;
+  }
+}
+
 /* スマホでは、読む・押す操作を優先して全体を大きくします。 */
 @media (max-width: 650px) {
   body {
