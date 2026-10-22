@@ -155,6 +155,8 @@ describe("CalendarView", () => {
   );
 
   it("places the completion shortcut before secondary toolbar actions", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date(2026, 9, 22));
     render(<App />);
     const shortcut = await screen.findByRole("button", { name: "今日の学習を完了済み" });
     const exportButton = screen.getByRole("button", { name: "データを書き出す" });
