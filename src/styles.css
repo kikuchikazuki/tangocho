@@ -47,6 +47,19 @@ h1 {
 .add-page {
   background: #ff5c35;
 }
+.calendar-nav {
+  border: 1px solid #d9deea;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: white;
+  color: #172033;
+  font-weight: 700;
+  cursor: pointer;
+}
+.calendar-nav.active {
+  background: #172033;
+  color: white;
+}
 .header-actions {
   display: flex;
   gap: 8px;

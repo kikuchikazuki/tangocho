@@ -162,4 +162,12 @@ describe("CalendarView", () => {
     const exportButton = screen.getByRole("button", { name: "データを書き出す" });
     expect(shortcut.compareDocumentPosition(exportButton) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
+
+  it("keeps the calendar navigation in the header instead of the deck tabs", async () => {
+    render(<App />);
+
+    const calendarButton = await screen.findByRole("button", { name: "カレンダー" });
+    expect(calendarButton.closest("header")).toBeTruthy();
+    expect(calendarButton.closest(".tabs")).toBeNull();
+  });
 });

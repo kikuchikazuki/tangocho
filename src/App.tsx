@@ -345,6 +345,12 @@ export default function App() {
           </div>
         </div>
         <div className="header-actions">
+          <button
+            className={view === "calendar" ? "calendar-nav active" : "calendar-nav"}
+            onClick={() => setView("calendar")}
+          >
+            カレンダー
+          </button>
           <button className="add-page" onClick={addPage}>
             ＋ 暗記帳を追加
           </button>
@@ -372,12 +378,6 @@ export default function App() {
             {item.name}
           </button>
         ))}
-        <button
-          className={view === "calendar" ? "active" : ""}
-          onClick={() => setView("calendar")}
-        >
-          カレンダー
-        </button>
       </nav>
       <section className="toolbar">
         <button
