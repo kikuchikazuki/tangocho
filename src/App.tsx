@@ -404,6 +404,11 @@ export default function App() {
           {todayCompleted ? "今日の学習を完了済み" : "今日の学習を完了"}
         </button>
       </section>
+      {message && (
+        <div className="message" role="status">
+          {message}
+        </div>
+      )}
       {view === "calendar" ? (
         <CalendarView
           pages={state.pages}
@@ -467,7 +472,6 @@ export default function App() {
             <button onClick={addCards} disabled={!paste.trim()}>
               この暗記帳に追加
             </button>
-            {message && <span className="message">{message}</span>}
           </section>
           <div className="legend">
             <span>左の項目</span>
