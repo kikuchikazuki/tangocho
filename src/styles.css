@@ -422,6 +422,11 @@ h1 {
   color: #aab4c4;
   background: #f8fafc;
 }
+.calendar-day.outside-month.has-completion {
+  background: #ffded4;
+  border-color: #ff5c35;
+  color: #172033;
+}
 .calendar-day.selected {
   outline: 3px solid #172033;
   outline-offset: 1px;

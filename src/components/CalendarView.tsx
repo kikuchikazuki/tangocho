@@ -66,7 +66,7 @@ export default function CalendarView({
           <button
             type="button"
             key={day.date}
-            aria-label={day.date}
+            aria-label={`${day.date}${hasCompletionOnDate(completionRecords, day.date) ? " 学習完了" : ""}`}
             data-date={day.date}
             aria-pressed={day.date === selectedDate}
             className={[

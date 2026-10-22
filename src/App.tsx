@@ -43,10 +43,23 @@ export default function App() {
   const [showDuplicates, setShowDuplicates] = useState(false);
   const [selected, setSelected] = useState<string[]>([]);
   const [view, setView] = useState<"decks" | "calendar">("decks");
+  const [today, setToday] = useState(() => localDateKey(new Date()));
   const importInput = useRef<HTMLInputElement>(null);
   const localRevision = useRef(0);
   const savedRevision = useRef(0);
   const saveQueue = useRef(Promise.resolve());
+
+  useEffect(() => {
+    const refreshToday = () => setToday(localDateKey(new Date()));
+    const timer = window.setInterval(refreshToday, 60_000);
+    window.addEventListener("focus", refreshToday);
+    document.addEventListener("visibilitychange", refreshToday);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener("focus", refreshToday);
+      document.removeEventListener("visibilitychange", refreshToday);
+    };
+  }, []);
 
   // 起動時にプロジェクト内JSONを読み込みます。
   useEffect(() => {
@@ -181,7 +194,6 @@ export default function App() {
       </div>
     );
 
-  const today = localDateKey(new Date());
   const todayCompleted = isPageCompleted(
     state.completionRecords,
     today,
@@ -211,6 +223,12 @@ export default function App() {
         pageId,
       ),
     }));
+  }
+
+  function toggleTodayCompletion() {
+    const currentDate = localDateKey(new Date());
+    setToday(currentDate);
+    toggleCompletion(currentDate, page.id);
   }
 
   function addPage() {
@@ -362,6 +380,15 @@ export default function App() {
         </button>
       </nav>
       <section className="toolbar">
+        <button
+          className={
+            todayCompleted ? "complete-button completed" : "complete-button"
+          }
+          onClick={toggleTodayCompletion}
+          aria-pressed={todayCompleted}
+        >
+          {todayCompleted ? "今日の学習を完了済み" : "今日の学習を完了"}
+        </button>
         <button onClick={exportData}>データを書き出す</button>
         <button onClick={() => importInput.current?.click()}>
           データを読み込む
@@ -393,15 +420,6 @@ export default function App() {
         <button onClick={() => clear("both")}>全進捗クリア</button>
         <button onClick={() => setShowDuplicates((value) => !value)}>
           重複チェック {groups.length ? `(${groups.length})` : ""}
-        </button>
-        <button
-          className={
-            todayCompleted ? "complete-button completed" : "complete-button"
-          }
-          onClick={() => toggleCompletion(today, page.id)}
-          aria-pressed={todayCompleted}
-        >
-          {todayCompleted ? "今日の学習を完了済み" : "今日の学習を完了"}
         </button>
       </section>
       {message && (
