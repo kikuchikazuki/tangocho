@@ -54,17 +54,16 @@ export function moveCardsBetweenPages(
   if (!source || !target) return state;
 
   const requested = new Set(cardIds);
-  const sourceCards = new Map(source.cards.map((card) => [card.id, card]));
-  const moving = cardIds.flatMap((cardId, index) => {
-    const card = sourceCards.get(cardId);
-    return card && cardIds.indexOf(cardId) === index ? [card] : [];
-  });
+  const moving = [...requested].flatMap((cardId) =>
+    source.cards.filter((card) => card.id === cardId),
+  );
   if (moving.length === 0) return state;
+  const movingCards = new Set(moving);
   return {
     ...state,
     pages: state.pages.map((page) =>
       page.id === sourcePageId
-        ? { ...page, cards: page.cards.filter((card) => !requested.has(card.id)) }
+        ? { ...page, cards: page.cards.filter((card) => !movingCards.has(card)) }
         : page.id === targetPageId
           ? { ...page, cards: [...page.cards, ...moving] }
           : page,

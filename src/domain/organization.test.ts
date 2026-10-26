@@ -70,6 +70,20 @@ describe("card organization", () => {
     expect(result.pages[1].cards.map((item) => item.id)).toEqual(["b", "a"]);
   });
 
+  it("moves every source card object with a requested duplicate ID", () => {
+    const first = card("duplicate");
+    const second = { ...card("duplicate"), left: "second duplicate" };
+    const untouched = card("other");
+    const input = state([page("source", [first, second, untouched]), page("target")]);
+
+    const result = moveCardsBetweenPages(input, ["duplicate"], "source", "target");
+
+    expect(result.pages[0].cards).toEqual([untouched]);
+    expect(result.pages[1].cards).toHaveLength(2);
+    expect(result.pages[1].cards[0]).toBe(first);
+    expect(result.pages[1].cards[1]).toBe(second);
+  });
+
   it("rejects same-page moves", () => {
     const input = state([page("source", [card("a")])]);
     expect(() => moveCardBetweenPages(input, "a", "source", "source")).toThrow();
