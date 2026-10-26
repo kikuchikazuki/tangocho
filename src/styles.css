@@ -463,6 +463,74 @@ h1 {
   border-color: #172033;
   color: #fff;
 }
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.organization {
+  display: grid;
+  gap: 18px;
+}
+.organization h2,
+.organization h3 {
+  margin: 0;
+}
+.organization-create,
+.organization-section {
+  background: #fff;
+  border: 1px solid #e4e8f0;
+  border-radius: 16px;
+  padding: 18px;
+}
+.organization-create,
+.organization-section-header,
+.organization-section-header form,
+.organization-pages li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.organization-section-header {
+  justify-content: space-between;
+}
+.organization input,
+.organization select,
+.organization button {
+  min-height: 42px;
+  border: 1px solid #d9deea;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font: inherit;
+}
+.organization button {
+  background: #172033;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+.organization .organization-delete {
+  background: #fff4f1;
+  border-color: #f0b8ad;
+  color: #b42318;
+}
+.organization-pages {
+  list-style: none;
+  padding: 0;
+  margin: 14px 0 0;
+}
+.organization-pages li {
+  justify-content: space-between;
+  border-top: 1px solid #e4e8f0;
+  padding: 12px 0;
+}
 @media (max-width: 650px) {
   .calendar {
     padding: 14px;

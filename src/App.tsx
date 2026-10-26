@@ -20,6 +20,8 @@ import {
 import { findDuplicateGroups } from "./domain/duplicates";
 import FlashcardTable from "./components/FlashcardTable";
 import CalendarView from "./components/CalendarView";
+import OrganizationView from "./components/OrganizationView";
+import { deleteFolder, setPageFolder } from "./domain/organization";
 import {
   isPageCompleted,
   localDateKey,
@@ -43,7 +45,7 @@ export default function App() {
   const [message, setMessage] = useState("");
   const [showDuplicates, setShowDuplicates] = useState(false);
   const [selected, setSelected] = useState<string[]>([]);
-  const [view, setView] = useState<"decks" | "calendar">("decks");
+  const [view, setView] = useState<"decks" | "calendar" | "organization">("decks");
   const [today, setToday] = useState(() => localDateKey(new Date()));
   const importInput = useRef<HTMLInputElement>(null);
   const localRevision = useRef(0);
@@ -354,6 +356,12 @@ export default function App() {
           >
             カレンダー
           </button>
+          <button
+            className={view === "organization" ? "calendar-nav active" : "calendar-nav"}
+            onClick={() => setView("organization")}
+          >
+            整理・管理
+          </button>
           <button className="add-page" onClick={addPage}>
             ＋ 暗記帳を追加
           </button>
@@ -382,7 +390,7 @@ export default function App() {
           </button>
         ))}
       </nav>
-      <section className="toolbar">
+      {view !== "organization" && <section className="toolbar">
         <button
           className={
             todayCompleted ? "complete-button completed" : "complete-button"
@@ -424,13 +432,37 @@ export default function App() {
         <button onClick={() => setShowDuplicates((value) => !value)}>
           重複チェック {groups.length ? `(${groups.length})` : ""}
         </button>
-      </section>
+      </section>}
       {message && (
         <div className="message" role="status">
           {message}
         </div>
       )}
-      {view === "calendar" ? (
+      {view === "organization" ? (
+        <OrganizationView
+          state={state}
+          onCreateFolder={(name) =>
+            applyLocalState((current) => ({
+              ...current,
+              folders: [...current.folders, { id: crypto.randomUUID(), name }],
+            }))
+          }
+          onRenameFolder={(folderId, name) =>
+            applyLocalState((current) => ({
+              ...current,
+              folders: current.folders.map((folder) =>
+                folder.id === folderId ? { ...folder, name } : folder,
+              ),
+            }))
+          }
+          onDeleteFolder={(folderId) =>
+            applyLocalState((current) => deleteFolder(current, folderId))
+          }
+          onSetPageFolder={(pageId, folderId) =>
+            applyLocalState((current) => setPageFolder(current, pageId, folderId))
+          }
+        />
+      ) : view === "calendar" ? (
         <CalendarView
           pages={state.pages}
           completionRecords={state.completionRecords}
