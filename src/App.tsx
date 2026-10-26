@@ -28,6 +28,7 @@ import {
 
 const emptyState: AppState = {
   pages: [],
+  folders: [],
   activePageId: "",
   completionRecords: [],
 };
@@ -91,6 +92,7 @@ export default function App() {
         const firstPage = createPage("自分の単語帳");
         setState({
           pages: [firstPage],
+          folders: [],
           activePageId: firstPage.id,
           completionRecords: [],
         });
@@ -100,6 +102,7 @@ export default function App() {
         const firstPage = createPage("自分の単語帳");
         setState({
           pages: [firstPage],
+          folders: [],
           activePageId: firstPage.id,
           completionRecords: [],
         });

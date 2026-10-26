@@ -17,16 +17,17 @@ vi.mock("../lib/supabase", () => ({
 
 vi.mock("../storage/cloudStorage", () => ({
   loadCloudState: async () => ({
-    pages: [{ id: "aws", name: "AWS暗記帳", cards: [] }],
+    pages: [{ id: "aws", name: "AWS暗記帳", cards: [], folderId: null }],
     activePageId: "aws",
+    folders: [],
     completionRecords: [{ date: "2026-10-22", pageId: "aws" }],
   }),
   saveCloudState: async () => undefined,
 }));
 
 const pages = [
-  { id: "aws", name: "AWS暗記帳", cards: [] },
-  { id: "english", name: "英単語", cards: [] },
+  { id: "aws", name: "AWS暗記帳", cards: [], folderId: null },
+  { id: "english", name: "英単語", cards: [], folderId: null },
 ];
 
 afterEach(() => {

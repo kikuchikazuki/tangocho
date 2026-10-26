@@ -22,6 +22,7 @@ const rows = [
 export const createInitialState = (): AppState => ({
   activePageId: "aws",
   completionRecords: [],
+  folders: [],
   pages: [
     {
       id: "aws",
@@ -35,6 +36,7 @@ export const createInitialState = (): AppState => ({
         leftProgress: 0,
         rightProgress: 0,
       })),
+      folderId: null,
     },
   ],
 });

@@ -7,7 +7,30 @@ describe("sanitizeAppState", () => {
   it("defaults missing completion records to an empty list", () => {
     expect(sanitizeAppState({ pages: [page], activePageId: "aws" })).toEqual({
       activePageId: "aws",
-      pages: [page],
+      folders: [],
+      pages: [{ ...page, folderId: null }],
+      completionRecords: [],
+    });
+  });
+
+  it("normalizes missing and invalid folder references", () => {
+    const folder = { id: "f1", name: "Study" };
+    expect(sanitizeAppState({
+      folders: [folder],
+      pages: [
+        page,
+        { ...page, id: "valid", folderId: "f1" },
+        { ...page, id: "invalid", folderId: "missing" },
+      ],
+      activePageId: "aws",
+    })).toEqual({
+      activePageId: "aws",
+      folders: [folder],
+      pages: [
+        { ...page, folderId: null },
+        { ...page, id: "valid", folderId: "f1" },
+        { ...page, id: "invalid", folderId: null },
+      ],
       completionRecords: [],
     });
   });
@@ -26,7 +49,8 @@ describe("sanitizeAppState", () => {
       ],
     })).toEqual({
       activePageId: "aws",
-      pages: [page],
+      folders: [],
+      pages: [{ ...page, folderId: null }],
       completionRecords: [valid],
     });
   });

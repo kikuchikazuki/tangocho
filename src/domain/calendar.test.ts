@@ -12,8 +12,8 @@ import {
 } from "./calendar";
 
 const pages: Page[] = [
-  { id: "aws", name: "AWS暗記帳", cards: [] },
-  { id: "english", name: "英単語", cards: [] },
+  { id: "aws", name: "AWS暗記帳", cards: [], folderId: null },
+  { id: "english", name: "英単語", cards: [], folderId: null },
 ];
 
 describe("calendar completion records", () => {

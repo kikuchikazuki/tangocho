@@ -9,10 +9,12 @@ export type Card = {
   leftProgress: Progress;
   rightProgress: Progress;
 };
-export type Page = { id: string; name: string; cards: Card[] };
+export type Folder = { id: string; name: string };
+export type Page = { id: string; name: string; cards: Card[]; folderId: string | null };
 export type CompletionRecord = { date: string; pageId: string };
 export type AppState = {
   pages: Page[];
+  folders: Folder[];
   activePageId: string;
   completionRecords: CompletionRecord[];
 };

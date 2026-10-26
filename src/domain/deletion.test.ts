@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { Page } from "./types";
 import { deleteCard, deletePage } from "./state";
 
-const page = (id: string, name: string): Page => ({ id, name, cards: [] });
+const page = (id: string, name: string): Page => ({ id, name, cards: [], folderId: null });
 
 describe("deletion operations", () => {
   it("deletes one card without changing other cards", () => {
@@ -35,11 +35,13 @@ describe("deletion operations", () => {
   it("deletes a page and selects another page", () => {
     const state = {
       pages: [page("a", "A"), page("b", "B")],
+      folders: [],
       activePageId: "a",
       completionRecords: [],
     };
     expect(deletePage(state, "a")).toEqual({
       pages: [page("b", "B")],
+      folders: [],
       activePageId: "b",
       completionRecords: [],
     });
@@ -48,6 +50,7 @@ describe("deletion operations", () => {
   it("removes completion records for a deleted page", () => {
     const state = {
       pages: [page("a", "A"), page("b", "B")],
+      folders: [],
       activePageId: "a",
       completionRecords: [
         { date: "2026-10-22", pageId: "a" },
@@ -57,6 +60,7 @@ describe("deletion operations", () => {
 
     expect(deletePage(state, "a")).toEqual({
       pages: [page("b", "B")],
+      folders: [],
       activePageId: "b",
       completionRecords: [{ date: "2026-10-23", pageId: "b" }],
     });

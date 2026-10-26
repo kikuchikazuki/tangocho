@@ -1,10 +1,6 @@
 import type { AppState } from "../domain/types";
-import { normalizeCompletionRecords } from "../domain/calendar";
+import { normalizeOrganizationState } from "../domain/organization";
 import { supabase } from "../lib/supabase";
-
-type SavedAppState = Omit<AppState, "completionRecords"> & {
-  completionRecords?: unknown;
-};
 
 function requireClient() {
   if (!supabase) throw new Error("Supabaseの環境変数が設定されていません。");
@@ -12,9 +8,10 @@ function requireClient() {
 }
 
 /** 文字化けの置換文字だけを取り除き、単語や説明そのものは残します。 */
-export function sanitizeAppState(state: SavedAppState): AppState {
+export function sanitizeAppState(state: unknown): AppState {
+  const normalized = normalizeOrganizationState(state);
   const clean = (text: string) => text.replace(/�/g, "");
-  const cleanedPages = state.pages.map((page) => ({
+  const cleanedPages = normalized.pages.map((page) => ({
     ...page,
     name: clean(page.name),
     cards: page.cards.map((card) => ({
@@ -24,9 +21,10 @@ export function sanitizeAppState(state: SavedAppState): AppState {
     })),
   }));
   return {
-    activePageId: state.activePageId,
+    activePageId: normalized.activePageId,
+    folders: normalized.folders,
     pages: cleanedPages,
-    completionRecords: normalizeCompletionRecords(state.completionRecords, cleanedPages),
+    completionRecords: normalized.completionRecords,
   };
 }
 
@@ -41,7 +39,7 @@ export async function loadCloudState(): Promise<AppState | null> {
     .eq("user_id", userData.user.id)
     .maybeSingle();
   if (error) throw error;
-  return data?.state ? sanitizeAppState(data.state as SavedAppState) : null;
+  return data?.state ? sanitizeAppState(data.state) : null;
 }
 
 export async function saveCloudState(state: AppState): Promise<void> {

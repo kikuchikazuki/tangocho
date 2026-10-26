@@ -9,6 +9,7 @@ export const createPage = (name: string): Page => ({
   id: id(),
   name: name.trim(),
   cards: [],
+  folderId: null,
 });
 export const deleteCard = (page: Page, cardId: string): Page => ({
   ...page,
@@ -18,6 +19,7 @@ export const deletePage = (state: AppState, pageId: string): AppState => {
   const pages = state.pages.filter((page) => page.id !== pageId);
   return {
     pages,
+    folders: state.folders,
     activePageId: pages[0]?.id ?? "",
     completionRecords: removePageCompletionRecords(state.completionRecords, pageId),
   };
