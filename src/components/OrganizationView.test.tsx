@@ -5,6 +5,28 @@ import { useState } from "react";
 import type { AppState } from "../domain/types";
 import { deleteFolder, setPageFolder } from "../domain/organization";
 import OrganizationView from "./OrganizationView";
+import App from "../App";
+
+vi.mock("../lib/supabase", () => ({
+  supabaseConfigured: true,
+  supabase: {
+    auth: {
+      getSession: async () => ({ data: { session: { user: { id: "test" } } } }),
+      onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => undefined } } }),
+      signOut: async () => undefined,
+    },
+  },
+}));
+
+vi.mock("../storage/cloudStorage", () => ({
+  loadCloudState: async () => ({
+    folders: [],
+    pages: [{ id: "aws", name: "AWS暗記帳", folderId: null, cards: [] }],
+    activePageId: "aws",
+    completionRecords: [],
+  }),
+  saveCloudState: async () => undefined,
+}));
 
 const initialState: AppState = {
   folders: [{ id: "study", name: "学習" }],
@@ -98,5 +120,38 @@ describe("OrganizationView", () => {
     fireEvent.click(screen.getByRole("button", { name: "学習を削除" }));
     expect(screen.queryByRole("region", { name: "学習" })).toBeNull();
     expect(within(screen.getByRole("region", { name: "未分類" })).getByText("AWS暗記帳")).toBeTruthy();
+  });
+
+  it("synchronizes an external rename while preserving an unsaved edit", () => {
+    const callbacks = {
+      onCreateFolder: () => undefined,
+      onRenameFolder: () => undefined,
+      onDeleteFolder: () => undefined,
+      onSetPageFolder: () => undefined,
+    };
+    const { rerender } = render(<OrganizationView state={initialState} {...callbacks} />);
+    rerender(<OrganizationView state={{ ...initialState, folders: [{ id: "study", name: "復習" }] }} {...callbacks} />);
+    expect((screen.getByRole("textbox", { name: "復習のフォルダ名" }) as HTMLInputElement).value).toBe("復習");
+
+    fireEvent.change(screen.getByRole("textbox", { name: "復習のフォルダ名" }), { target: { value: "自分の編集中の名前" } });
+    rerender(<OrganizationView state={{ ...initialState, folders: [{ id: "study", name: "更新後" }] }} {...callbacks} />);
+    expect((screen.getByRole("textbox", { name: "更新後のフォルダ名" }) as HTMLInputElement).value).toBe("自分の編集中の名前");
+  });
+});
+
+describe("App organization navigation", () => {
+  it("creates a folder when randomUUID is unavailable", async () => {
+    render(<App />);
+    fireEvent.click(await screen.findByRole("button", { name: "整理・管理" }));
+    vi.stubGlobal("crypto", { randomUUID: undefined });
+    fireEvent.change(screen.getByRole("textbox", { name: "新しいフォルダ名" }), { target: { value: "資格" } });
+    fireEvent.click(screen.getByRole("button", { name: "フォルダを作成" }));
+    expect(screen.getByRole("region", { name: "資格" })).toBeTruthy();
+  });
+
+  it("does not offer active-deck deletion while managing folders", async () => {
+    render(<App />);
+    fireEvent.click(await screen.findByRole("button", { name: "整理・管理" }));
+    expect(screen.queryByRole("button", { name: "この暗記帳を削除" })).toBeNull();
   });
 });

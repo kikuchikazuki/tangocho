@@ -10,6 +10,7 @@ import AuthScreen from "./components/AuthScreen";
 import {
   appendCards,
   clearProgress,
+  createId,
   createPage,
   deleteCard,
   deletePage,
@@ -365,9 +366,11 @@ export default function App() {
           <button className="add-page" onClick={addPage}>
             ＋ 暗記帳を追加
           </button>
-          <button className="delete-page" onClick={removePage}>
-            この暗記帳を削除
-          </button>
+          {view !== "organization" && (
+            <button className="delete-page" onClick={removePage}>
+              この暗記帳を削除
+            </button>
+          )}
           <button onClick={() => void supabase?.auth.signOut()}>
             ログアウト
           </button>
@@ -444,7 +447,7 @@ export default function App() {
           onCreateFolder={(name) =>
             applyLocalState((current) => ({
               ...current,
-              folders: [...current.folders, { id: crypto.randomUUID(), name }],
+              folders: [...current.folders, { id: createId(), name }],
             }))
           }
           onRenameFolder={(folderId, name) =>

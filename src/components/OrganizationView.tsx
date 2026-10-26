@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import type { AppState, Folder, Page } from "../domain/types";
 
 type Props = {
@@ -46,11 +46,17 @@ function FolderSection({ folder, state, onRenameFolder, onDeleteFolder, onSetPag
   onSetPageFolder: Props["onSetPageFolder"];
 }) {
   const [name, setName] = useState(folder.name);
+  const [isDirty, setIsDirty] = useState(false);
+
+  useEffect(() => {
+    if (!isDirty) setName(folder.name);
+  }, [folder.name, isDirty]);
 
   function rename(event: FormEvent) {
     event.preventDefault();
     const trimmed = name.trim();
     if (trimmed && trimmed !== folder.name) onRenameFolder(folder.id, trimmed);
+    setIsDirty(false);
   }
 
   return (
@@ -60,7 +66,10 @@ function FolderSection({ folder, state, onRenameFolder, onDeleteFolder, onSetPag
         <form onSubmit={rename}>
           <label>
             <span className="sr-only">{folder.name}のフォルダ名</span>
-            <input aria-label={`${folder.name}のフォルダ名`} value={name} onChange={(event) => setName(event.target.value)} />
+            <input aria-label={`${folder.name}のフォルダ名`} value={name} onChange={(event) => {
+              setName(event.target.value);
+              setIsDirty(true);
+            }} />
           </label>
           <button type="submit" aria-label={`${folder.name}を名前変更`}>名前変更</button>
         </form>
