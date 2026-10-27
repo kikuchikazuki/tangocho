@@ -49,3 +49,11 @@ Added a regression test using prompts `問題`, `問題`, and `問題（a）` wi
 The per-card move button had a unique name, but its sibling selection checkbox and destination select still used only the prompt. Cards with equal prompts therefore exposed duplicate accessible names. All three per-card controls now share a label formatter that includes a concise prompt and the full stable card ID. The checkbox uses `問題「<prompt>」を選択（カードID: <ID>）`; the select uses `問題「<prompt>」の移動先（カードID: <ID>）`.
 
 Expanded the duplicate-prompt regression test to assert the exact checkbox and select names and their uniqueness. The test failed before the fix with two `問題aを選択` labels. After the fix, `npm test -- --run src/components/FlashcardTable.test.tsx src/domain/organization.test.ts src/domain/deletion.test.ts` passed: **3 files, 20 tests, exit 0**. `npm run build` passed: **TypeScript and Vite build, exit 0; 72 modules transformed**. The existing Vite native config loader warning remains. No known concerns from this fix.
+
+## Duplicate legacy card IDs (fourth follow-up)
+
+Legacy pages may contain cards with identical IDs. The three per-card accessible names now include the full card ID and the current one-based rendered row number, for example `問題「同じ問題」を移動（カードID: shared、行: 1）`. The checkbox and destination select use the same ID-and-row suffix. Duplicate-ID rows also receive distinct React keys, avoiding the duplicate-key warning seen in the failing regression run.
+
+Added a test with two cards sharing both prompt and ID. Before the fix it failed because both move buttons had the same name and React warned about duplicate keys. After the fix, `npm test -- --run src/components/FlashcardTable.test.tsx src/domain/organization.test.ts src/domain/deletion.test.ts` passed: **3 files, 21 tests, exit 0**. `npm run build` passed: **TypeScript and Vite build, exit 0; 72 modules transformed**. The existing Vite native config loader warning remains.
+
+Concern: this follow-up addresses accessible names and render keys only. Selection and domain moves still identify cards by card ID; with duplicate legacy IDs, selecting or moving one matching ID can affect all matching cards. Resolving individual duplicate-ID behavior would require a separate data identity change beyond this accessibility fix.

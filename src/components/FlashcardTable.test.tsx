@@ -69,8 +69,8 @@ describe("FlashcardTable moves", () => {
     const confirm = vi.fn(() => true);
     vi.stubGlobal("confirm", confirm);
     render(<Harness />);
-    fireEvent.change(screen.getByRole("combobox", { name: "問題「問題a」の移動先（カードID: a）" }), { target: { value: "target" } });
-    fireEvent.click(screen.getByRole("button", { name: "問題「問題a」を移動（カードID: a）" }));
+    fireEvent.change(screen.getByRole("combobox", { name: "問題「問題a」の移動先（カードID: a、行: 1）" }), { target: { value: "target" } });
+    fireEvent.click(screen.getByRole("button", { name: "問題「問題a」を移動（カードID: a、行: 1）" }));
     expect(confirm).toHaveBeenCalledWith(expect.stringContaining("先"));
     expect(state().pages[0].cards.map((item) => item.id)).toEqual(["b"]);
     expect(state().pages[1].cards[0]).toMatchObject({ id: "a", leftProgress: 2, rightProgress: 3 });
@@ -82,8 +82,8 @@ describe("FlashcardTable moves", () => {
     const confirm = vi.fn(() => false);
     vi.stubGlobal("confirm", confirm);
     render(<Harness />);
-    fireEvent.click(screen.getByRole("checkbox", { name: "問題「問題a」を選択（カードID: a）" }));
-    fireEvent.click(screen.getByRole("checkbox", { name: "問題「問題b」を選択（カードID: b）" }));
+    fireEvent.click(screen.getByRole("checkbox", { name: "問題「問題a」を選択（カードID: a、行: 1）" }));
+    fireEvent.click(screen.getByRole("checkbox", { name: "問題「問題b」を選択（カードID: b、行: 2）" }));
     fireEvent.change(screen.getByRole("combobox", { name: "選択した問題の移動先" }), { target: { value: "target" } });
     fireEvent.click(screen.getByRole("button", { name: "選択した問題を移動" }));
     expect(confirm).toHaveBeenCalledWith(expect.stringContaining("先"));
@@ -97,7 +97,7 @@ describe("FlashcardTable moves", () => {
 
   it("excludes the source page from individual and bulk targets", () => {
     render(<Harness />);
-    for (const name of ["問題「問題a」の移動先（カードID: a）", "選択した問題の移動先"]) {
+    for (const name of ["問題「問題a」の移動先（カードID: a、行: 1）", "選択した問題の移動先"]) {
       const options = within(screen.getByRole("combobox", { name })).getAllByRole("option");
       expect(options.map((option) => (option as HTMLOptionElement).value)).toEqual(["", "target"]);
     }
@@ -106,9 +106,9 @@ describe("FlashcardTable moves", () => {
   it("does not move or clear an individually selected card when confirmation is canceled", () => {
     vi.stubGlobal("confirm", vi.fn(() => false));
     render(<Harness />);
-    fireEvent.click(screen.getByRole("checkbox", { name: "問題「問題a」を選択（カードID: a）" }));
-    fireEvent.change(screen.getByRole("combobox", { name: "問題「問題a」の移動先（カードID: a）" }), { target: { value: "target" } });
-    fireEvent.click(screen.getByRole("button", { name: "問題「問題a」を移動（カードID: a）" }));
+    fireEvent.click(screen.getByRole("checkbox", { name: "問題「問題a」を選択（カードID: a、行: 1）" }));
+    fireEvent.change(screen.getByRole("combobox", { name: "問題「問題a」の移動先（カードID: a、行: 1）" }), { target: { value: "target" } });
+    fireEvent.click(screen.getByRole("button", { name: "問題「問題a」を移動（カードID: a、行: 1）" }));
     expect(state().pages[0].cards).toHaveLength(2);
     expect(screen.getByTestId("selected").textContent).toBe("a");
   });
@@ -152,18 +152,18 @@ describe("FlashcardTable moves", () => {
     expect(names).toHaveLength(2);
     expect(new Set(names).size).toBe(2);
     expect(names).toEqual([
-      "問題「問題a」を移動（カードID: a）",
-      "問題「問題a」を移動（カードID: b）",
+      "問題「問題a」を移動（カードID: a、行: 1）",
+      "問題「問題a」を移動（カードID: b、行: 2）",
     ]);
     const checkboxNames = Array.from(document.querySelectorAll(".card-move input"), (input) => input.getAttribute("aria-label"));
     const selectNames = Array.from(document.querySelectorAll(".card-move select"), (select) => select.getAttribute("aria-label"));
     expect(checkboxNames).toEqual([
-      "問題「問題a」を選択（カードID: a）",
-      "問題「問題a」を選択（カードID: b）",
+      "問題「問題a」を選択（カードID: a、行: 1）",
+      "問題「問題a」を選択（カードID: b、行: 2）",
     ]);
     expect(selectNames).toEqual([
-      "問題「問題a」の移動先（カードID: a）",
-      "問題「問題a」の移動先（カードID: b）",
+      "問題「問題a」の移動先（カードID: a、行: 1）",
+      "問題「問題a」の移動先（カードID: b、行: 2）",
     ]);
     expect(new Set(checkboxNames).size).toBe(2);
     expect(new Set(selectNames).size).toBe(2);
@@ -181,11 +181,35 @@ describe("FlashcardTable moves", () => {
       onProgress={() => undefined} onDelete={() => undefined} />);
     const names = Array.from(document.querySelectorAll(".card-move button"), (button) => button.getAttribute("aria-label"));
     expect(names).toEqual([
-      "問題「問題」を移動（カードID: a）",
-      "問題「問題」を移動（カードID: b）",
-      "問題「問題（a）」を移動（カードID: c）",
+      "問題「問題」を移動（カードID: a、行: 1）",
+      "問題「問題」を移動（カードID: b、行: 2）",
+      "問題「問題（a）」を移動（カードID: c、行: 3）",
     ]);
     expect(new Set(names).size).toBe(3);
+  });
+
+  it("distinguishes every per-card control when legacy cards share an ID", () => {
+    const duplicateIdPage = { ...initial.pages[0], cards: [
+      { ...card("shared"), left: "同じ問題" },
+      { ...card("shared"), left: "同じ問題" },
+    ] };
+    render(<FlashcardTable page={duplicateIdPage} pages={[duplicateIdPage, initial.pages[1]]}
+      selected={[]} onSelectCard={() => undefined} onMoveCard={() => undefined}
+      onMoveSelected={() => undefined} onReveal={() => undefined}
+      onProgress={() => undefined} onDelete={() => undefined} />);
+    const labels = (selector: string) => Array.from(document.querySelectorAll(selector), (element) => element.getAttribute("aria-label"));
+    expect(labels(".card-move button")).toEqual([
+      "問題「同じ問題」を移動（カードID: shared、行: 1）",
+      "問題「同じ問題」を移動（カードID: shared、行: 2）",
+    ]);
+    expect(labels(".card-move input")).toEqual([
+      "問題「同じ問題」を選択（カードID: shared、行: 1）",
+      "問題「同じ問題」を選択（カードID: shared、行: 2）",
+    ]);
+    expect(labels(".card-move select")).toEqual([
+      "問題「同じ問題」の移動先（カードID: shared、行: 1）",
+      "問題「同じ問題」の移動先（カードID: shared、行: 2）",
+    ]);
   });
 });
 
@@ -193,13 +217,13 @@ describe("App move integration", () => {
   it("keeps the source deck active while moving a card into another deck", async () => {
     vi.stubGlobal("confirm", vi.fn(() => true));
     render(<App />);
-    const target = await screen.findByRole("combobox", { name: "問題「問題a」の移動先（カードID: a）" });
+    const target = await screen.findByRole("combobox", { name: "問題「問題a」の移動先（カードID: a、行: 1）" });
     fireEvent.change(target, { target: { value: "target" } });
-    fireEvent.click(screen.getByRole("button", { name: "問題「問題a」を移動（カードID: a）" }));
+    fireEvent.click(screen.getByRole("button", { name: "問題「問題a」を移動（カードID: a、行: 1）" }));
     expect(screen.getByRole("button", { name: "元" }).className).toBe("active");
-    expect(screen.queryByRole("combobox", { name: "問題「問題a」の移動先（カードID: a）" })).toBeNull();
+    expect(screen.queryByRole("combobox", { name: "問題「問題a」の移動先（カードID: a、行: 1）" })).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "先" }));
-    expect(screen.getByRole("combobox", { name: "問題「問題a」の移動先（カードID: a）" })).toBeTruthy();
+    expect(screen.getByRole("combobox", { name: "問題「問題a」の移動先（カードID: a、行: 1）" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "進捗2週目" })).toBeTruthy();
   });
 
@@ -207,8 +231,8 @@ describe("App move integration", () => {
     const confirm = vi.fn(() => false);
     vi.stubGlobal("confirm", confirm);
     render(<App />);
-    fireEvent.click(await screen.findByRole("checkbox", { name: "問題「問題a」を選択（カードID: a）" }));
-    fireEvent.click(screen.getByRole("checkbox", { name: "問題「問題b」を選択（カードID: b）" }));
+    fireEvent.click(await screen.findByRole("checkbox", { name: "問題「問題a」を選択（カードID: a、行: 1）" }));
+    fireEvent.click(screen.getByRole("checkbox", { name: "問題「問題b」を選択（カードID: b、行: 2）" }));
     fireEvent.change(screen.getByRole("combobox", { name: "選択した問題の移動先" }), { target: { value: "target" } });
     fireEvent.click(screen.getByRole("button", { name: "選択した問題を移動" }));
     expect(screen.getByText("2件選択中")).toBeTruthy();
@@ -218,7 +242,7 @@ describe("App move integration", () => {
     expect(screen.getByText("0件選択中")).toBeTruthy();
     expect(screen.getByRole("button", { name: "元" }).className).toBe("active");
     fireEvent.click(screen.getByRole("button", { name: "先" }));
-    expect(screen.getByRole("checkbox", { name: "問題「問題a」を選択（カードID: a）" })).toBeTruthy();
-    expect(screen.getByRole("checkbox", { name: "問題「問題b」を選択（カードID: b）" })).toBeTruthy();
+    expect(screen.getByRole("checkbox", { name: "問題「問題a」を選択（カードID: a、行: 1）" })).toBeTruthy();
+    expect(screen.getByRole("checkbox", { name: "問題「問題b」を選択（カードID: b、行: 2）" })).toBeTruthy();
   });
 });

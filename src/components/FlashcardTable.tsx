@@ -26,12 +26,12 @@ function MoveTarget({ pages, sourcePageId, label, value, onChange }: {
   </select>;
 }
 
-function CardMove({ card, page, pages, selected, moveLabel, onSelectCard, onMoveCard }: {
+function CardMove({ card, page, pages, selected, rowNumber, onSelectCard, onMoveCard }: {
   card: Card;
   page: Page;
   pages: Page[];
   selected: boolean;
-  moveLabel: string;
+  rowNumber: number;
   onSelectCard: MoveProps["onSelectCard"];
   onMoveCard: MoveProps["onMoveCard"];
 }) {
@@ -40,13 +40,13 @@ function CardMove({ card, page, pages, selected, moveLabel, onSelectCard, onMove
   const validTarget = targetPage?.id ?? "";
   return <div className="card-move">
     <label>
-      <input type="checkbox" aria-label={cardControlLabel(card, "を選択")} checked={selected}
+      <input type="checkbox" aria-label={cardControlLabel(card, "を選択", rowNumber)} checked={selected}
         onChange={(event) => onSelectCard(card.id, event.target.checked)} />
       選択
     </label>
-    <MoveTarget pages={pages} sourcePageId={page.id} label={cardControlLabel(card, "の移動先")}
+    <MoveTarget pages={pages} sourcePageId={page.id} label={cardControlLabel(card, "の移動先", rowNumber)}
       value={validTarget} onChange={setTarget} />
-    <button type="button" aria-label={moveLabel} disabled={!validTarget} onClick={() => {
+    <button type="button" aria-label={cardControlLabel(card, "を移動", rowNumber)} disabled={!validTarget} onClick={() => {
       if (targetPage && confirm(`「${card.left}」を「${targetPage.name}」へ移動しますか？`)) {
         onMoveCard(card.id, targetPage.id);
       }
@@ -70,9 +70,9 @@ function BulkMove({ page, pages, selected, onMoveSelected }: Pick<MoveProps, "pa
   </div>;
 }
 
-function cardControlLabel(card: Card, action: "を選択" | "の移動先" | "を移動"): string {
+function cardControlLabel(card: Card, action: "を選択" | "の移動先" | "を移動", rowNumber: number): string {
   const prompt = card.left.trim().slice(0, 32) || "無題の問題";
-  return `問題「${prompt}」${action}（カードID: ${card.id}）`;
+  return `問題「${prompt}」${action}（カードID: ${card.id}、行: ${rowNumber}）`;
 }
 
 export default function FlashcardTable({
@@ -93,8 +93,8 @@ export default function FlashcardTable({
   return (
     <main className="cards">
       <BulkMove key={page.id} page={page} pages={pages} selected={selected} onMoveSelected={onMoveSelected} />
-      {page.cards.map((c) => (
-        <div className="row" key={c.id}>
+      {page.cards.map((c, index) => (
+        <div className="row" key={page.cards.some((item, itemIndex) => itemIndex !== index && item.id === c.id) ? `row:${index}` : `id:${c.id}`}>
           {(["left", "right"] as Side[]).map((s) => {
             const text = s === "left" ? c.left : c.right;
             const shown = s === "left" ? c.leftReveal : c.rightReveal;
@@ -122,7 +122,7 @@ export default function FlashcardTable({
             );
           })}
           <CardMove card={c} page={page} pages={pages} selected={selected.includes(c.id)}
-            moveLabel={cardControlLabel(c, "を移動")}
+            rowNumber={index + 1}
             onSelectCard={onSelectCard} onMoveCard={onMoveCard} />
         </div>
       ))}
