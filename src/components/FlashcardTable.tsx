@@ -40,11 +40,11 @@ function CardMove({ card, page, pages, selected, moveLabel, onSelectCard, onMove
   const validTarget = targetPage?.id ?? "";
   return <div className="card-move">
     <label>
-      <input type="checkbox" aria-label={`${card.left}を選択`} checked={selected}
+      <input type="checkbox" aria-label={cardControlLabel(card, "を選択")} checked={selected}
         onChange={(event) => onSelectCard(card.id, event.target.checked)} />
       選択
     </label>
-    <MoveTarget pages={pages} sourcePageId={page.id} label={`${card.left}の移動先`}
+    <MoveTarget pages={pages} sourcePageId={page.id} label={cardControlLabel(card, "の移動先")}
       value={validTarget} onChange={setTarget} />
     <button type="button" aria-label={moveLabel} disabled={!validTarget} onClick={() => {
       if (targetPage && confirm(`「${card.left}」を「${targetPage.name}」へ移動しますか？`)) {
@@ -70,9 +70,9 @@ function BulkMove({ page, pages, selected, onMoveSelected }: Pick<MoveProps, "pa
   </div>;
 }
 
-function cardMoveLabel(card: Card): string {
+function cardControlLabel(card: Card, action: "を選択" | "の移動先" | "を移動"): string {
   const prompt = card.left.trim().slice(0, 32) || "無題の問題";
-  return `問題「${prompt}」を移動（カードID: ${card.id}）`;
+  return `問題「${prompt}」${action}（カードID: ${card.id}）`;
 }
 
 export default function FlashcardTable({
@@ -122,7 +122,7 @@ export default function FlashcardTable({
             );
           })}
           <CardMove card={c} page={page} pages={pages} selected={selected.includes(c.id)}
-            moveLabel={cardMoveLabel(c)}
+            moveLabel={cardControlLabel(c, "を移動")}
             onSelectCard={onSelectCard} onMoveCard={onMoveCard} />
         </div>
       ))}
