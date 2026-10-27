@@ -1,18 +1,85 @@
-import type { Page, Side, Progress } from "../domain/types";
+import { useState } from "react";
+import type { Page, Side, Progress, Card } from "../domain/types";
 import ProgressCycle from "./ProgressCycle";
+
+type MoveProps = {
+  page: Page;
+  pages: Page[];
+  selected: string[];
+  onSelectCard: (id: string, checked: boolean) => void;
+  onMoveCard: (id: string, targetPageId: string) => void;
+  onMoveSelected: (ids: string[], targetPageId: string) => void;
+};
+
+function MoveTarget({ pages, sourcePageId, label, value, onChange }: {
+  pages: Page[];
+  sourcePageId: string;
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return <select aria-label={label} value={value} onChange={(event) => onChange(event.target.value)}>
+    <option value="">移動先を選択</option>
+    {pages.filter((item) => item.id !== sourcePageId).map((item) => (
+      <option key={item.id} value={item.id}>{item.name}</option>
+    ))}
+  </select>;
+}
+
+function CardMove({ card, page, pages, selected, onSelectCard, onMoveCard }: {
+  card: Card;
+  page: Page;
+  pages: Page[];
+  selected: boolean;
+  onSelectCard: MoveProps["onSelectCard"];
+  onMoveCard: MoveProps["onMoveCard"];
+}) {
+  const [target, setTarget] = useState("");
+  const validTarget = pages.some((item) => item.id === target && item.id !== page.id) ? target : "";
+  return <div className="card-move">
+    <label>
+      <input type="checkbox" aria-label={`${card.left}を選択`} checked={selected}
+        onChange={(event) => onSelectCard(card.id, event.target.checked)} />
+      選択
+    </label>
+    <MoveTarget pages={pages} sourcePageId={page.id} label={`${card.left}の移動先`}
+      value={validTarget} onChange={setTarget} />
+    <button type="button" disabled={!validTarget} onClick={() => {
+      if (confirm(`「${card.left}」を移動しますか？`)) onMoveCard(card.id, validTarget);
+    }}>移動</button>
+  </div>;
+}
+
 export default function FlashcardTable({
   page,
+  pages,
+  selected,
+  onSelectCard,
+  onMoveCard,
+  onMoveSelected,
   onReveal,
   onProgress,
   onDelete,
-}: {
-  page: Page;
+}: MoveProps & {
   onReveal: (id: string, s: Side) => void;
   onProgress: (id: string, s: Side, v: Progress) => void;
   onDelete: (id: string) => void;
 }) {
+  const [bulkTarget, setBulkTarget] = useState("");
+  const validBulkTarget = pages.some((item) => item.id === bulkTarget && item.id !== page.id) ? bulkTarget : "";
+  const selectedOnPage = page.cards.filter((card) => selected.includes(card.id)).map((card) => card.id);
   return (
     <main className="cards">
+      <div className="bulk-move">
+        <span>{selectedOnPage.length}件選択中</span>
+        <MoveTarget pages={pages} sourcePageId={page.id} label="選択した問題の移動先"
+          value={validBulkTarget} onChange={setBulkTarget} />
+        <button type="button" disabled={!selectedOnPage.length || !validBulkTarget} onClick={() => {
+          if (confirm(`${selectedOnPage.length}件の問題を移動しますか？`)) {
+            onMoveSelected(selectedOnPage, validBulkTarget);
+          }
+        }}>選択した問題を移動</button>
+      </div>
       {page.cards.map((c) => (
         <div className="row" key={c.id}>
           {(["left", "right"] as Side[]).map((s) => {
@@ -41,6 +108,8 @@ export default function FlashcardTable({
               </div>
             );
           })}
+          <CardMove card={c} page={page} pages={pages} selected={selected.includes(c.id)}
+            onSelectCard={onSelectCard} onMoveCard={onMoveCard} />
         </div>
       ))}
     </main>

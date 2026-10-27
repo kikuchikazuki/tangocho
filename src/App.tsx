@@ -22,7 +22,7 @@ import { findDuplicateGroups } from "./domain/duplicates";
 import FlashcardTable from "./components/FlashcardTable";
 import CalendarView from "./components/CalendarView";
 import OrganizationView from "./components/OrganizationView";
-import { deleteFolder, setPageFolder } from "./domain/organization";
+import { deleteFolder, moveCardBetweenPages, moveCardsBetweenPages, setPageFolder } from "./domain/organization";
 import {
   isPageCompleted,
   localDateKey,
@@ -340,6 +340,22 @@ export default function App() {
     setShowDuplicates(false);
   }
 
+  function moveCard(cardId: string, targetPageId: string) {
+    if (targetPageId === page.id || !state.pages.some((item) => item.id === targetPageId) ||
+        !page.cards.some((card) => card.id === cardId)) return;
+    applyLocalState((current) => moveCardBetweenPages(current, cardId, page.id, targetPageId));
+    setSelected((current) => current.filter((id) => id !== cardId));
+  }
+
+  function moveSelected(cardIds: string[], targetPageId: string) {
+    const sourceIds = new Set(page.cards.map((card) => card.id));
+    const movingIds = cardIds.filter((id) => sourceIds.has(id));
+    if (!movingIds.length || targetPageId === page.id ||
+        !state.pages.some((item) => item.id === targetPageId)) return;
+    applyLocalState((current) => moveCardsBetweenPages(current, movingIds, page.id, targetPageId));
+    setSelected((current) => current.filter((id) => !movingIds.includes(id)));
+  }
+
   return (
     <div className="app">
       <header>
@@ -382,6 +398,7 @@ export default function App() {
             className={view === "decks" && item.id === page.id ? "active" : ""}
             onClick={() => {
               setView("decks");
+              if (item.id !== page.id) setSelected([]);
               applyLocalState((current) => ({
                 ...current,
                 activePageId: item.id,
@@ -535,6 +552,12 @@ export default function App() {
           </div>
           <FlashcardTable
             page={page}
+            pages={state.pages}
+            selected={selected}
+            onSelectCard={(id, checked) => setSelected((current) =>
+              checked ? [...current, id] : current.filter((item) => item !== id))}
+            onMoveCard={moveCard}
+            onMoveSelected={moveSelected}
             onReveal={(id, side) =>
               updatePage((current) => toggleCardReveal(current, id, side))
             }
