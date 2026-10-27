@@ -37,3 +37,9 @@ The review identified two UI defects in commit `4b10a76`: the bulk destination s
 - Added App-level bulk coverage for cancellation, confirmation, selection clearing, source-deck continuity, and destination content.
 
 The new regression suite failed before the fix for the missing accessible names, retained bulk destination, and destination-free confirmation. After the fix, `npm test -- --run src/components/FlashcardTable.test.tsx src/domain/organization.test.ts src/domain/deletion.test.ts` passed: **3 files, 19 tests, exit 0**. `npm run build` passed: **TypeScript and Vite build, exit 0; 72 modules transformed**. `git diff --check` passed. The existing Vite native config loader warning remains; there are no known functional concerns from this follow-up.
+
+## Accessibility collision fix (second follow-up)
+
+Review found that conditional ID suffixes could still produce equal accessible names. For example, two cards prompted `問題` made the first label `問題（a）を移動`, which collided with a third card whose prompt was literally `問題（a）`. The move button now always uses `問題「<short prompt>」を移動（カードID: <full stable ID>）`. The full ID is outside the prompt delimiters and is present for every card, so distinct card IDs produce distinct names even when prompt text contains an ID-like suffix.
+
+Added a regression test using prompts `問題`, `問題`, and `問題（a）` with IDs `a`, `b`, and `c`; it checks the exact accessible names and their uniqueness. The test-first run failed for the expected naming mismatch. After the fix, `npm test -- --run src/components/FlashcardTable.test.tsx src/domain/organization.test.ts src/domain/deletion.test.ts` passed: **3 files, 20 tests, exit 0**. `npm run build` passed: **TypeScript and Vite build, exit 0; 72 modules transformed**. The existing Vite native config loader warning remains. No known concerns from this fix.

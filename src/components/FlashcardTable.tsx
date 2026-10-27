@@ -70,11 +70,9 @@ function BulkMove({ page, pages, selected, onMoveSelected }: Pick<MoveProps, "pa
   </div>;
 }
 
-function cardMoveLabel(card: Card, page: Page): string {
+function cardMoveLabel(card: Card): string {
   const prompt = card.left.trim().slice(0, 32) || "無題の問題";
-  const duplicated = page.cards.some((item) => item.id !== card.id &&
-    (item.left.trim().slice(0, 32) || "無題の問題") === prompt);
-  return `${prompt}${duplicated ? `（${card.id}）` : ""}を移動`;
+  return `問題「${prompt}」を移動（カードID: ${card.id}）`;
 }
 
 export default function FlashcardTable({
@@ -124,7 +122,7 @@ export default function FlashcardTable({
             );
           })}
           <CardMove card={c} page={page} pages={pages} selected={selected.includes(c.id)}
-            moveLabel={cardMoveLabel(c, page)}
+            moveLabel={cardMoveLabel(c)}
             onSelectCard={onSelectCard} onMoveCard={onMoveCard} />
         </div>
       ))}

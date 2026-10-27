@@ -70,7 +70,7 @@ describe("FlashcardTable moves", () => {
     vi.stubGlobal("confirm", confirm);
     render(<Harness />);
     fireEvent.change(screen.getByRole("combobox", { name: "問題aの移動先" }), { target: { value: "target" } });
-    fireEvent.click(screen.getByRole("button", { name: "問題aを移動" }));
+    fireEvent.click(screen.getByRole("button", { name: "問題「問題a」を移動（カードID: a）" }));
     expect(confirm).toHaveBeenCalledWith(expect.stringContaining("先"));
     expect(state().pages[0].cards.map((item) => item.id)).toEqual(["b"]);
     expect(state().pages[1].cards[0]).toMatchObject({ id: "a", leftProgress: 2, rightProgress: 3 });
@@ -108,7 +108,7 @@ describe("FlashcardTable moves", () => {
     render(<Harness />);
     fireEvent.click(screen.getByRole("checkbox", { name: "問題aを選択" }));
     fireEvent.change(screen.getByRole("combobox", { name: "問題aの移動先" }), { target: { value: "target" } });
-    fireEvent.click(screen.getByRole("button", { name: "問題aを移動" }));
+    fireEvent.click(screen.getByRole("button", { name: "問題「問題a」を移動（カードID: a）" }));
     expect(state().pages[0].cards).toHaveLength(2);
     expect(screen.getByTestId("selected").textContent).toBe("a");
   });
@@ -148,9 +148,32 @@ describe("FlashcardTable moves", () => {
       selected={[]} onSelectCard={() => undefined} onMoveCard={() => undefined}
       onMoveSelected={() => undefined} onReveal={() => undefined}
       onProgress={() => undefined} onDelete={() => undefined} />);
-    const names = screen.getAllByRole("button", { name: /問題a.*を移動/ }).map((button) => button.getAttribute("aria-label"));
+    const names = Array.from(document.querySelectorAll(".card-move button"), (button) => button.getAttribute("aria-label"));
     expect(names).toHaveLength(2);
     expect(new Set(names).size).toBe(2);
+    expect(names).toEqual([
+      "問題「問題a」を移動（カードID: a）",
+      "問題「問題a」を移動（カードID: b）",
+    ]);
+  });
+
+  it("keeps move names unique when a prompt contains another card's ID suffix", () => {
+    const collisionPage = { ...initial.pages[0], cards: [
+      { ...card("a"), left: "問題" },
+      { ...card("b"), left: "問題" },
+      { ...card("c"), left: "問題（a）" },
+    ] };
+    render(<FlashcardTable page={collisionPage} pages={[collisionPage, initial.pages[1]]}
+      selected={[]} onSelectCard={() => undefined} onMoveCard={() => undefined}
+      onMoveSelected={() => undefined} onReveal={() => undefined}
+      onProgress={() => undefined} onDelete={() => undefined} />);
+    const names = Array.from(document.querySelectorAll(".card-move button"), (button) => button.getAttribute("aria-label"));
+    expect(names).toEqual([
+      "問題「問題」を移動（カードID: a）",
+      "問題「問題」を移動（カードID: b）",
+      "問題「問題（a）」を移動（カードID: c）",
+    ]);
+    expect(new Set(names).size).toBe(3);
   });
 });
 
@@ -160,7 +183,7 @@ describe("App move integration", () => {
     render(<App />);
     const target = await screen.findByRole("combobox", { name: "問題aの移動先" });
     fireEvent.change(target, { target: { value: "target" } });
-    fireEvent.click(screen.getByRole("button", { name: "問題aを移動" }));
+    fireEvent.click(screen.getByRole("button", { name: "問題「問題a」を移動（カードID: a）" }));
     expect(screen.getByRole("button", { name: "元" }).className).toBe("active");
     expect(screen.queryByRole("combobox", { name: "問題aの移動先" })).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "先" }));
