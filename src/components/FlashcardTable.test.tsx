@@ -66,10 +66,12 @@ afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 describe("FlashcardTable moves", () => {
   it("moves one card after confirmation and keeps its progress and completion record", () => {
-    vi.stubGlobal("confirm", vi.fn(() => true));
+    const confirm = vi.fn(() => true);
+    vi.stubGlobal("confirm", confirm);
     render(<Harness />);
     fireEvent.change(screen.getByRole("combobox", { name: "問題aの移動先" }), { target: { value: "target" } });
-    fireEvent.click(screen.getAllByRole("button", { name: "移動" })[0]);
+    fireEvent.click(screen.getByRole("button", { name: "問題aを移動" }));
+    expect(confirm).toHaveBeenCalledWith(expect.stringContaining("先"));
     expect(state().pages[0].cards.map((item) => item.id)).toEqual(["b"]);
     expect(state().pages[1].cards[0]).toMatchObject({ id: "a", leftProgress: 2, rightProgress: 3 });
     expect(state().completionRecords).toEqual(initial.completionRecords);
@@ -84,6 +86,7 @@ describe("FlashcardTable moves", () => {
     fireEvent.click(screen.getByRole("checkbox", { name: "問題bを選択" }));
     fireEvent.change(screen.getByRole("combobox", { name: "選択した問題の移動先" }), { target: { value: "target" } });
     fireEvent.click(screen.getByRole("button", { name: "選択した問題を移動" }));
+    expect(confirm).toHaveBeenCalledWith(expect.stringContaining("先"));
     expect(state().pages[0].cards).toHaveLength(2);
     expect(screen.getByTestId("selected").textContent).toBe("a,b");
     confirm.mockReturnValue(true);
@@ -105,9 +108,49 @@ describe("FlashcardTable moves", () => {
     render(<Harness />);
     fireEvent.click(screen.getByRole("checkbox", { name: "問題aを選択" }));
     fireEvent.change(screen.getByRole("combobox", { name: "問題aの移動先" }), { target: { value: "target" } });
-    fireEvent.click(screen.getAllByRole("button", { name: "移動" })[0]);
+    fireEvent.click(screen.getByRole("button", { name: "問題aを移動" }));
     expect(state().pages[0].cards).toHaveLength(2);
     expect(screen.getByTestId("selected").textContent).toBe("a");
+  });
+
+  it("requires a fresh bulk target after switching source decks, including when returning", () => {
+    const pages: AppState["pages"] = [
+      initial.pages[0],
+      { ...initial.pages[1], cards: [card("c")] },
+      { id: "third", name: "第三", folderId: null, cards: [] },
+    ];
+    const callbacks = {
+      onSelectCard: () => undefined,
+      onMoveCard: () => undefined,
+      onMoveSelected: () => undefined,
+      onReveal: () => undefined,
+      onProgress: () => undefined,
+      onDelete: () => undefined,
+    };
+    const { rerender } = render(<FlashcardTable page={pages[0]} pages={pages} selected={["a"]} {...callbacks} />);
+    const bulkTarget = () => screen.getByRole("combobox", { name: "選択した問題の移動先" }) as HTMLSelectElement;
+    const bulkButton = () => screen.getByRole("button", { name: "選択した問題を移動" }) as HTMLButtonElement;
+    fireEvent.change(bulkTarget(), { target: { value: "third" } });
+    expect(bulkButton().disabled).toBe(false);
+
+    rerender(<FlashcardTable page={pages[1]} pages={pages} selected={["c"]} {...callbacks} />);
+    expect(bulkTarget().value).toBe("");
+    expect(bulkButton().disabled).toBe(true);
+
+    rerender(<FlashcardTable page={pages[0]} pages={pages} selected={["a"]} {...callbacks} />);
+    expect(bulkTarget().value).toBe("");
+    expect(bulkButton().disabled).toBe(true);
+  });
+
+  it("gives each card a distinct move button name, including duplicate prompts", () => {
+    const duplicatePage = { ...initial.pages[0], cards: [card("a"), { ...card("b"), left: "問題a" }] };
+    render(<FlashcardTable page={duplicatePage} pages={[duplicatePage, initial.pages[1]]}
+      selected={[]} onSelectCard={() => undefined} onMoveCard={() => undefined}
+      onMoveSelected={() => undefined} onReveal={() => undefined}
+      onProgress={() => undefined} onDelete={() => undefined} />);
+    const names = screen.getAllByRole("button", { name: /問題a.*を移動/ }).map((button) => button.getAttribute("aria-label"));
+    expect(names).toHaveLength(2);
+    expect(new Set(names).size).toBe(2);
   });
 });
 
@@ -117,11 +160,30 @@ describe("App move integration", () => {
     render(<App />);
     const target = await screen.findByRole("combobox", { name: "問題aの移動先" });
     fireEvent.change(target, { target: { value: "target" } });
-    fireEvent.click(screen.getAllByRole("button", { name: "移動" })[0]);
+    fireEvent.click(screen.getByRole("button", { name: "問題aを移動" }));
     expect(screen.getByRole("button", { name: "元" }).className).toBe("active");
     expect(screen.queryByRole("combobox", { name: "問題aの移動先" })).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "先" }));
     expect(screen.getByRole("combobox", { name: "問題aの移動先" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "進捗2週目" })).toBeTruthy();
+  });
+
+  it("moves selected cards through App and clears selection after confirmation", async () => {
+    const confirm = vi.fn(() => false);
+    vi.stubGlobal("confirm", confirm);
+    render(<App />);
+    fireEvent.click(await screen.findByRole("checkbox", { name: "問題aを選択" }));
+    fireEvent.click(screen.getByRole("checkbox", { name: "問題bを選択" }));
+    fireEvent.change(screen.getByRole("combobox", { name: "選択した問題の移動先" }), { target: { value: "target" } });
+    fireEvent.click(screen.getByRole("button", { name: "選択した問題を移動" }));
+    expect(screen.getByText("2件選択中")).toBeTruthy();
+    confirm.mockReturnValue(true);
+    fireEvent.click(screen.getByRole("button", { name: "選択した問題を移動" }));
+    expect(confirm).toHaveBeenLastCalledWith(expect.stringContaining("先"));
+    expect(screen.getByText("0件選択中")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "元" }).className).toBe("active");
+    fireEvent.click(screen.getByRole("button", { name: "先" }));
+    expect(screen.getByRole("checkbox", { name: "問題aを選択" })).toBeTruthy();
+    expect(screen.getByRole("checkbox", { name: "問題bを選択" })).toBeTruthy();
   });
 });

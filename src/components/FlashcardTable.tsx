@@ -26,16 +26,18 @@ function MoveTarget({ pages, sourcePageId, label, value, onChange }: {
   </select>;
 }
 
-function CardMove({ card, page, pages, selected, onSelectCard, onMoveCard }: {
+function CardMove({ card, page, pages, selected, moveLabel, onSelectCard, onMoveCard }: {
   card: Card;
   page: Page;
   pages: Page[];
   selected: boolean;
+  moveLabel: string;
   onSelectCard: MoveProps["onSelectCard"];
   onMoveCard: MoveProps["onMoveCard"];
 }) {
   const [target, setTarget] = useState("");
-  const validTarget = pages.some((item) => item.id === target && item.id !== page.id) ? target : "";
+  const targetPage = pages.find((item) => item.id === target && item.id !== page.id);
+  const validTarget = targetPage?.id ?? "";
   return <div className="card-move">
     <label>
       <input type="checkbox" aria-label={`${card.left}を選択`} checked={selected}
@@ -44,10 +46,35 @@ function CardMove({ card, page, pages, selected, onSelectCard, onMoveCard }: {
     </label>
     <MoveTarget pages={pages} sourcePageId={page.id} label={`${card.left}の移動先`}
       value={validTarget} onChange={setTarget} />
-    <button type="button" disabled={!validTarget} onClick={() => {
-      if (confirm(`「${card.left}」を移動しますか？`)) onMoveCard(card.id, validTarget);
+    <button type="button" aria-label={moveLabel} disabled={!validTarget} onClick={() => {
+      if (targetPage && confirm(`「${card.left}」を「${targetPage.name}」へ移動しますか？`)) {
+        onMoveCard(card.id, targetPage.id);
+      }
     }}>移動</button>
   </div>;
+}
+
+function BulkMove({ page, pages, selected, onMoveSelected }: Pick<MoveProps, "page" | "pages" | "selected" | "onMoveSelected">) {
+  const [bulkTarget, setBulkTarget] = useState("");
+  const targetPage = pages.find((item) => item.id === bulkTarget && item.id !== page.id);
+  const selectedOnPage = page.cards.filter((card) => selected.includes(card.id)).map((card) => card.id);
+  return <div className="bulk-move">
+    <span>{selectedOnPage.length}件選択中</span>
+    <MoveTarget pages={pages} sourcePageId={page.id} label="選択した問題の移動先"
+      value={targetPage?.id ?? ""} onChange={setBulkTarget} />
+    <button type="button" disabled={!selectedOnPage.length || !targetPage} onClick={() => {
+      if (targetPage && confirm(`${selectedOnPage.length}件の問題を「${targetPage.name}」へ移動しますか？`)) {
+        onMoveSelected(selectedOnPage, targetPage.id);
+      }
+    }}>選択した問題を移動</button>
+  </div>;
+}
+
+function cardMoveLabel(card: Card, page: Page): string {
+  const prompt = card.left.trim().slice(0, 32) || "無題の問題";
+  const duplicated = page.cards.some((item) => item.id !== card.id &&
+    (item.left.trim().slice(0, 32) || "無題の問題") === prompt);
+  return `${prompt}${duplicated ? `（${card.id}）` : ""}を移動`;
 }
 
 export default function FlashcardTable({
@@ -65,21 +92,9 @@ export default function FlashcardTable({
   onProgress: (id: string, s: Side, v: Progress) => void;
   onDelete: (id: string) => void;
 }) {
-  const [bulkTarget, setBulkTarget] = useState("");
-  const validBulkTarget = pages.some((item) => item.id === bulkTarget && item.id !== page.id) ? bulkTarget : "";
-  const selectedOnPage = page.cards.filter((card) => selected.includes(card.id)).map((card) => card.id);
   return (
     <main className="cards">
-      <div className="bulk-move">
-        <span>{selectedOnPage.length}件選択中</span>
-        <MoveTarget pages={pages} sourcePageId={page.id} label="選択した問題の移動先"
-          value={validBulkTarget} onChange={setBulkTarget} />
-        <button type="button" disabled={!selectedOnPage.length || !validBulkTarget} onClick={() => {
-          if (confirm(`${selectedOnPage.length}件の問題を移動しますか？`)) {
-            onMoveSelected(selectedOnPage, validBulkTarget);
-          }
-        }}>選択した問題を移動</button>
-      </div>
+      <BulkMove key={page.id} page={page} pages={pages} selected={selected} onMoveSelected={onMoveSelected} />
       {page.cards.map((c) => (
         <div className="row" key={c.id}>
           {(["left", "right"] as Side[]).map((s) => {
@@ -109,6 +124,7 @@ export default function FlashcardTable({
             );
           })}
           <CardMove card={c} page={page} pages={pages} selected={selected.includes(c.id)}
+            moveLabel={cardMoveLabel(c, page)}
             onSelectCard={onSelectCard} onMoveCard={onMoveCard} />
         </div>
       ))}
