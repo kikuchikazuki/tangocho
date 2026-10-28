@@ -1,0 +1,86 @@
+import { useState } from "react";
+import type { Folder, Page } from "../domain/types";
+
+type SidebarProps = {
+  pages: Page[];
+  folders: Folder[];
+  activePageId: string;
+  view: "decks" | "calendar" | "organization";
+  collapsed: boolean;
+  onToggleCollapsed: () => void;
+  onSelectView: (view: "decks" | "calendar" | "organization") => void;
+  onSelectPage: (pageId: string) => void;
+};
+
+export default function Sidebar({
+  pages,
+  folders,
+  activePageId,
+  view,
+  collapsed,
+  onToggleCollapsed,
+  onSelectView,
+  onSelectPage,
+}: SidebarProps) {
+  // フォルダは最初から開き、利用者が必要なグループだけ閉じられます。
+  const [closedFolders, setClosedFolders] = useState<string[]>([]);
+  const toggleFolder = (folderId: string) =>
+    setClosedFolders((current) =>
+      current.includes(folderId)
+        ? current.filter((id) => id !== folderId)
+        : [...current, folderId],
+    );
+
+  const renderPage = (page: Page) => (
+    <button
+      className={view === "decks" && page.id === activePageId ? "sidebar-page active" : "sidebar-page"}
+      onClick={() => onSelectPage(page.id)}
+      key={page.id}
+      title={collapsed ? page.name : undefined}
+    >
+      <span aria-hidden="true">▸</span>
+      {!collapsed && <span className="sidebar-label">{page.name}</span>}
+    </button>
+  );
+
+  return (
+    <aside className={collapsed ? "sidebar collapsed" : "sidebar"} aria-label="メインナビゲーション">
+      <div className="sidebar-heading">
+        {!collapsed && <strong>単語帳</strong>}
+        <button className="sidebar-toggle" onClick={onToggleCollapsed} aria-label={collapsed ? "サイドバーを開く" : "サイドバーを閉じる"}>
+          {collapsed ? "☰" : "‹"}
+        </button>
+      </div>
+      <nav className="sidebar-nav">
+        <button className={view === "calendar" ? "sidebar-link active" : "sidebar-link"} onClick={() => onSelectView("calendar")}>
+          <span aria-hidden="true">▦</span>{!collapsed && "カレンダー"}
+        </button>
+        <button className={view === "organization" ? "sidebar-link active" : "sidebar-link"} onClick={() => onSelectView("organization")}>
+          <span aria-hidden="true">⚙</span>{!collapsed && "整理・管理"}
+        </button>
+      </nav>
+      <div className="sidebar-groups">
+        {folders.map((folder) => {
+          const folderPages = pages.filter((page) => page.folderId === folder.id);
+          const closed = closedFolders.includes(folder.id);
+          return (
+            <section className="sidebar-group" key={folder.id}>
+              <button className="sidebar-folder" onClick={() => toggleFolder(folder.id)} title={folder.name}>
+                <span aria-hidden="true">{closed ? "›" : "⌄"}</span>
+                {!collapsed && <><span className="sidebar-folder-name">{folder.name}</span><small>{folderPages.length}</small></>}
+              </button>
+              {!closed && !collapsed && folderPages.map(renderPage)}
+            </section>
+          );
+        })}
+        <section className="sidebar-group">
+          <button className="sidebar-folder" onClick={() => toggleFolder("__uncategorized__")}>
+            <span aria-hidden="true">{closedFolders.includes("__uncategorized__") ? "›" : "⌄"}</span>
+            {!collapsed && <><span className="sidebar-folder-name">未分類</span><small>{pages.filter((page) => !page.folderId).length}</small></>}
+          </button>
+          {!closedFolders.includes("__uncategorized__") && !collapsed && pages.filter((page) => !page.folderId).map(renderPage)}
+        </section>
+      </div>
+    </aside>
+  );
+}

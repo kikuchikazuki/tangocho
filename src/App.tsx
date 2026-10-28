@@ -22,6 +22,7 @@ import { findDuplicateGroups } from "./domain/duplicates";
 import FlashcardTable from "./components/FlashcardTable";
 import CalendarView from "./components/CalendarView";
 import OrganizationView from "./components/OrganizationView";
+import Sidebar from "./components/Sidebar";
 import { deleteFolder, moveCardBetweenPages, moveCardsBetweenPages, setPageFolder } from "./domain/organization";
 import {
   isPageCompleted,
@@ -47,6 +48,7 @@ export default function App() {
   const [showDuplicates, setShowDuplicates] = useState(false);
   const [selected, setSelected] = useState<string[]>([]);
   const [view, setView] = useState<"decks" | "calendar" | "organization">("decks");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [today, setToday] = useState(() => localDateKey(new Date()));
   const importInput = useRef<HTMLInputElement>(null);
   const localRevision = useRef(0);
@@ -364,7 +366,22 @@ export default function App() {
   }
 
   return (
-    <div className="app">
+    <div className="app-shell">
+      <Sidebar
+        pages={state.pages}
+        folders={state.folders}
+        activePageId={page.id}
+        view={view}
+        collapsed={sidebarCollapsed}
+        onToggleCollapsed={() => setSidebarCollapsed((current) => !current)}
+        onSelectView={setView}
+        onSelectPage={(pageId) => {
+          setView("decks");
+          setSelected([]);
+          applyLocalState((current) => ({ ...current, activePageId: pageId }));
+        }}
+      />
+      <main className="app">
       <header>
         <div>
           <p className="eyebrow">ONE QUESTION, ONE ANSWER</p>
@@ -399,24 +416,6 @@ export default function App() {
           </button>
         </div>
       </header>
-      <nav className="tabs">
-        {state.pages.map((item) => (
-          <button
-            className={view === "decks" && item.id === page.id ? "active" : ""}
-            onClick={() => {
-              setView("decks");
-              if (item.id !== page.id) setSelected([]);
-              applyLocalState((current) => ({
-                ...current,
-                activePageId: item.id,
-              }));
-            }}
-            key={item.id}
-          >
-            {item.name}
-          </button>
-        ))}
-      </nav>
       {view !== "organization" && <section className="toolbar">
         <button
           className={
@@ -578,6 +577,7 @@ export default function App() {
           />
         </>
       )}
+      </main>
     </div>
   );
 }
