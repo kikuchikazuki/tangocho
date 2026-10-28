@@ -46,7 +46,7 @@ export default function Sidebar({
       key={page.id}
       title={collapsed ? page.name : undefined}
     >
-      <span aria-hidden="true">▸</span>
+      <span className="sidebar-page-icon" aria-hidden="true">•</span>
       {!collapsed && <span className="sidebar-label">{page.name}</span>}
     </button>
   );
@@ -61,23 +61,23 @@ export default function Sidebar({
       </div>
       <nav className="sidebar-nav">
         <button className={view === "calendar" ? "sidebar-link active" : "sidebar-link"} onClick={() => onSelectView("calendar")}>
-          <span aria-hidden="true">▦</span>{!collapsed && "カレンダー"}
+          <span className="sidebar-icon" aria-hidden="true">▦</span>{!collapsed && "カレンダー"}
         </button>
         <button className={view === "organization" ? "sidebar-link active" : "sidebar-link"} onClick={() => onSelectView("organization")}>
-          <span aria-hidden="true">⚙</span>{!collapsed && "整理・管理"}
+          <span className="sidebar-icon" aria-hidden="true">⚙</span>{!collapsed && "整理・管理"}
         </button>
       </nav>
       <div className="sidebar-actions">
         <button className="sidebar-action add" onClick={onAddPage} title="暗記帳を追加">
-          <span aria-hidden="true">＋</span>{!collapsed && "暗記帳を追加"}
+          <span className="sidebar-icon" aria-hidden="true">＋</span>{!collapsed && "暗記帳を追加"}
         </button>
         {canDeletePage && (
           <button className="sidebar-action danger" onClick={onDeletePage} title="この暗記帳を削除">
-            <span aria-hidden="true">−</span>{!collapsed && "この暗記帳を削除"}
+            <span className="sidebar-icon" aria-hidden="true">−</span>{!collapsed && "この暗記帳を削除"}
           </button>
         )}
         <button className="sidebar-action" onClick={onSignOut} title="ログアウト">
-          <span aria-hidden="true">↪</span>{!collapsed && "ログアウト"}
+          <span className="sidebar-icon" aria-hidden="true">↪</span>{!collapsed && "ログアウト"}
         </button>
       </div>
       <div className="sidebar-groups">
@@ -86,8 +86,9 @@ export default function Sidebar({
           const closed = closedFolders.includes(folder.id);
           return (
             <section className="sidebar-group" key={folder.id}>
-              <button className="sidebar-folder" onClick={() => toggleFolder(folder.id)} title={folder.name}>
-                <span aria-hidden="true">{closed ? "›" : "⌄"}</span>
+              <button className={closed ? "sidebar-folder closed" : "sidebar-folder open"} onClick={() => toggleFolder(folder.id)} title={folder.name} aria-expanded={!closed}>
+                <span className="sidebar-folder-chevron" aria-hidden="true">{closed ? "›" : "⌄"}</span>
+                <span className="sidebar-folder-icon" aria-hidden="true">{closed ? "▰" : "▾"}</span>
                 {!collapsed && <><span className="sidebar-folder-name">{folder.name}</span><small>{folderPages.length}</small></>}
               </button>
               {!closed && !collapsed && folderPages.map(renderPage)}
@@ -95,8 +96,9 @@ export default function Sidebar({
           );
         })}
         <section className="sidebar-group">
-          <button className="sidebar-folder" onClick={() => toggleFolder("__uncategorized__")}>
-            <span aria-hidden="true">{closedFolders.includes("__uncategorized__") ? "›" : "⌄"}</span>
+          <button className={closedFolders.includes("__uncategorized__") ? "sidebar-folder closed" : "sidebar-folder open"} onClick={() => toggleFolder("__uncategorized__")} aria-expanded={!closedFolders.includes("__uncategorized__")}>
+            <span className="sidebar-folder-chevron" aria-hidden="true">{closedFolders.includes("__uncategorized__") ? "›" : "⌄"}</span>
+            <span className="sidebar-folder-icon" aria-hidden="true">{closedFolders.includes("__uncategorized__") ? "▰" : "▾"}</span>
             {!collapsed && <><span className="sidebar-folder-name">未分類</span><small>{pages.filter((page) => !page.folderId).length}</small></>}
           </button>
           {!closedFolders.includes("__uncategorized__") && !collapsed && pages.filter((page) => !page.folderId).map(renderPage)}
