@@ -87,7 +87,6 @@ export default function Sidebar({
           return (
             <section className="sidebar-group" key={folder.id}>
               <button className={closed ? "sidebar-folder closed" : "sidebar-folder open"} onClick={() => toggleFolder(folder.id)} title={folder.name} aria-expanded={!closed}>
-                <span className="sidebar-folder-chevron" aria-hidden="true">{closed ? "›" : "⌄"}</span>
                 <span className={closed ? "sidebar-folder-icon closed" : "sidebar-folder-icon open"} aria-hidden="true" />
                 {!collapsed && <><span className="sidebar-folder-name">{folder.name}</span><small>{folderPages.length}</small></>}
               </button>
@@ -97,7 +96,6 @@ export default function Sidebar({
         })}
         <section className="sidebar-group">
           <button className={closedFolders.includes("__uncategorized__") ? "sidebar-folder closed" : "sidebar-folder open"} onClick={() => toggleFolder("__uncategorized__")} aria-expanded={!closedFolders.includes("__uncategorized__")}>
-            <span className="sidebar-folder-chevron" aria-hidden="true">{closedFolders.includes("__uncategorized__") ? "›" : "⌄"}</span>
             <span className={closedFolders.includes("__uncategorized__") ? "sidebar-folder-icon closed" : "sidebar-folder-icon open"} aria-hidden="true" />
             {!collapsed && <><span className="sidebar-folder-name">未分類</span><small>{pages.filter((page) => !page.folderId).length}</small></>}
           </button>

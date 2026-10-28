@@ -47,7 +47,6 @@ body {
 .sidebar-folder { font-weight: 700; border-left: 3px solid transparent; }
 .sidebar-folder.open { border-left-color: #c5a46d; background: #f1ede5; }
 .sidebar-folder.closed { color: #6f655b; }
-.sidebar-folder-chevron { width: 14px; color: #a2763d; font-size: 1.15rem; font-weight: 900; text-align: center; }
 .sidebar-folder-icon {
   position: relative;
   display: inline-block;
