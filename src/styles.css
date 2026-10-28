@@ -48,8 +48,42 @@ body {
 .sidebar-folder.open { border-left-color: #c5a46d; background: #f1ede5; }
 .sidebar-folder.closed { color: #6f655b; }
 .sidebar-folder-chevron { width: 14px; color: #a2763d; font-size: 1.15rem; font-weight: 900; text-align: center; }
-.sidebar-folder-icon { width: 18px; color: #c08a3e; font-size: .82rem; line-height: 1; }
-.sidebar-folder.closed .sidebar-folder-icon { color: #9d8c78; }
+.sidebar-folder-icon {
+  position: relative;
+  display: inline-block;
+  width: 20px;
+  height: 14px;
+  flex: 0 0 20px;
+  border: 2px solid #b9853d;
+  border-radius: 2px 4px 4px 4px;
+  background: #f5cf8a;
+}
+.sidebar-folder-icon::before {
+  content: "";
+  position: absolute;
+  top: -6px;
+  left: -2px;
+  width: 9px;
+  height: 6px;
+  border: 2px solid #b9853d;
+  border-bottom: 0;
+  border-radius: 3px 3px 0 0;
+  background: #f5cf8a;
+}
+.sidebar-folder-icon.open::after {
+  content: "";
+  position: absolute;
+  left: -2px;
+  right: -3px;
+  bottom: -2px;
+  height: 8px;
+  border: 2px solid #b9853d;
+  border-radius: 3px;
+  background: #ffe5ae;
+  transform: skewX(-12deg);
+}
+.sidebar-folder-icon.closed { background: #e9bd6c; }
+.sidebar-folder-icon.closed::before { background: #e9bd6c; }
 .sidebar-folder-name, .sidebar-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sidebar-folder small { margin-left: auto; color: #82776b; }
 .sidebar-page { width: calc(100% - 12px); margin-left: 12px; padding: 7px 8px; font-size: .94rem; }
