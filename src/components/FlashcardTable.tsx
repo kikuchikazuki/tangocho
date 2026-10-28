@@ -111,16 +111,16 @@ export default function FlashcardTable({
                   value={prog}
                   onChange={(v) => onProgress(c.id, s, v)}
                 />
-                <button
-                  className="delete-card"
-                  onClick={() => onDelete(c.id)}
-                  aria-label="この問題を削除"
-                >
-                  削除
-                </button>
               </div>
             );
           })}
+          <button
+            className="row-delete"
+            onClick={() => onDelete(c.id)}
+            aria-label={`「${c.left.trim().slice(0, 32) || "無題の問題"}」を削除`}
+          >
+            この問題を削除
+          </button>
           <CardMove card={c} page={page} pages={pages} selected={selected.includes(c.id)}
             rowNumber={index + 1}
             onSelectCard={onSelectCard} onMoveCard={onMoveCard} />

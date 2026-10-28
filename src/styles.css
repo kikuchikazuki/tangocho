@@ -158,6 +158,18 @@ h1 {
   padding: 8px 10px;
   font-size: 0.75rem;
 }
+.row-delete {
+  grid-column: 1 / -1;
+  justify-self: end;
+  border: 1px solid #f0b8ad;
+  border-radius: 8px;
+  padding: 7px 10px;
+  background: #fff4f1;
+  color: #b42318;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
 .tabs {
   display: flex;
   gap: 8px;
