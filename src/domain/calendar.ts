@@ -9,6 +9,7 @@ export type CalendarDay = {
 const pad = (value: number) => String(value).padStart(2, "0");
 const datePattern = /^(\d{4})-(\d{2})-(\d{2})$/;
 const createLocalDate = (year: number, month: number, day: number): Date => {
+  // UTCではなくローカル日付を使います。UTC変換すると日本時間の深夜に日付がずれるためです。
   const date = new Date(0);
   date.setHours(0, 0, 0, 0);
   date.setFullYear(year, month, day);
@@ -33,6 +34,7 @@ export function isValidDateKey(value: string): boolean {
 }
 
 export function getMonthDays(year: number, month: number): CalendarDay[] {
+  // 月初の曜日から前月分を含めた6週間（42日）のカレンダーを作ります。
   const first = createLocalDate(year, month, 1);
   const start = createLocalDate(year, month, 1 - first.getDay());
   return Array.from({ length: 42 }, (_, index) => {
@@ -63,6 +65,7 @@ export function toggleCompletionRecord(
   date: string,
   pageId: string,
 ): CompletionRecord[] {
+  // 同じ日・同じ暗記帳の記録があれば削除、なければ追加するトグル操作です。
   if (isPageCompleted(records, date, pageId)) {
     return records.filter((record) => !(record.date === date && record.pageId === pageId));
   }
@@ -80,6 +83,7 @@ export function normalizeCompletionRecords(
   value: unknown,
   pages: Page[],
 ): CompletionRecord[] {
+  // クラウドや古いバックアップから来た不正な日付・存在しない暗記帳IDを除外します。
   if (!Array.isArray(value)) return [];
   const pageIds = new Set(pages.map((page) => page.id));
   const seen = new Set<string>();

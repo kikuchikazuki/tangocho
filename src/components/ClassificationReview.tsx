@@ -9,6 +9,7 @@ type Props = {
 };
 
 export default function ClassificationReview({ state, onApply }: Props) {
+  // 候補は一時的な画面状態です。反映ボタンを押すまでAppStateは変更しません。
   const initial = useMemo(() => state.pages.flatMap((page) => page.cards.map((card, index) => ({
     key: `${page.id}:${card.id}:${index}`,
     cardId: card.id,

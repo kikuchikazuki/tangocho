@@ -6,6 +6,7 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 
 /** Adds organization defaults to persisted or imported legacy state. */
 export function normalizeOrganizationState(state: unknown): AppState {
+  // フォルダ機能追加前のデータにも対応するため、読み込み時に不足フィールドを補います。
   if (!isRecord(state)) throw new Error("Invalid app state");
   const folders: Folder[] = Array.isArray(state.folders)
     ? state.folders.filter(
@@ -48,6 +49,8 @@ export function moveCardsBetweenPages(
   sourcePageId: string,
   targetPageId: string,
 ): AppState {
+  // カードの中身は変更せず、配列上の所属だけを移し替えます。
+  // そのため、表裏の進捗や表示状態、IDが維持されます。
   if (sourcePageId === targetPageId) throw new Error("Source and target pages must differ");
   const source = state.pages.find((page) => page.id === sourcePageId);
   const target = state.pages.find((page) => page.id === targetPageId);
@@ -72,6 +75,7 @@ export function moveCardsBetweenPages(
 }
 
 export function setPageFolder(state: AppState, pageId: string, folderId: string | null): AppState {
+  // 未分類はnullで表現します。存在しないフォルダIDは保存しないよう検証します。
   if (folderId !== null && !state.folders.some((folder) => folder.id === folderId)) {
     throw new Error(`Unknown folder: ${folderId}`);
   }
@@ -82,6 +86,7 @@ export function setPageFolder(state: AppState, pageId: string, folderId: string 
 }
 
 export function deleteFolder(state: AppState, folderId: string): AppState {
+  // フォルダを消しても暗記帳や問題は消さず、未分類へ戻します。
   return {
     ...state,
     folders: state.folders.filter((folder) => folder.id !== folderId),

@@ -16,6 +16,7 @@ function PageList({ pages, folders, onSetPageFolder }: {
   folders: Folder[];
   onSetPageFolder: Props["onSetPageFolder"];
 }) {
+  // 暗記帳ごとにフォルダを選べるようにし、未分類は空文字（保存時はnull）で扱います。
   return (
     <ul className="organization-pages">
       {pages.map((page) => (
@@ -47,6 +48,7 @@ function FolderSection({ folder, state, onRenameFolder, onDeleteFolder, onSetPag
   onDeleteFolder: Props["onDeleteFolder"];
   onSetPageFolder: Props["onSetPageFolder"];
 }) {
+  // フォルダ名入力は外部同期を受け取りつつ、入力中のユーザー編集は上書きしません。
   const [name, setName] = useState(folder.name);
   const [isDirty, setIsDirty] = useState(false);
 

@@ -1,6 +1,7 @@
 import type { AppState, Page, Side } from "./types";
 import { removePageCompletionRecords } from "./calendar";
 import { parseCards } from "./parser";
+
 // HTTPSでないスマホ環境でも動くよう、簡易IDを予備にします。
 export const createId = () =>
   globalThis.crypto?.randomUUID?.() ??
@@ -16,6 +17,7 @@ export const deleteCard = (page: Page, cardId: string): Page => ({
   cards: page.cards.filter((card) => card.id !== cardId),
 });
 export const deletePage = (state: AppState, pageId: string): AppState => {
+  // 暗記帳を削除すると、紐づいているカレンダー記録も意味を失うため一緒に削除します。
   const pages = state.pages.filter((page) => page.id !== pageId);
   return {
     pages,
@@ -25,6 +27,7 @@ export const deletePage = (state: AppState, pageId: string): AppState => {
   };
 };
 export const appendCards = (page: Page, input: string) => {
+  // 入力解析はparserに任せ、ここでは新しいIDと初期進捗だけを付けます。
   const parsed = parseCards(input);
   const cards = parsed.map((x) => ({
     id: createId(),
@@ -67,6 +70,7 @@ export const updateProgress = (
   side: Side,
   value: number,
 ): Page => ({
+  // mapで新しいPage/Cardを作ることで、Reactが変更を検知できる不変更新にしています。
   ...page,
   cards: page.cards.map((c) =>
     c.id === cardId ? { ...c, [side + "Progress"]: value } : c,

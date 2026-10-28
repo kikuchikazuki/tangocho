@@ -9,6 +9,7 @@ function requireClient() {
 
 /** 文字化けの置換文字だけを取り除き、単語や説明そのものは残します。 */
 export function sanitizeAppState(state: unknown): AppState {
+  // 保存前に必ず同じ正規化を通すことで、古い形式や文字化けがクラウドへ戻るのを防ぎます。
   const normalized = normalizeOrganizationState(state);
   const clean = (text: string) => text.replace(/�/g, "");
   const cleanedPages = normalized.pages.map((page) => ({
@@ -29,6 +30,7 @@ export function sanitizeAppState(state: unknown): AppState {
 }
 
 export async function loadCloudState(): Promise<AppState | null> {
+  // SupabaseではユーザーIDごとに1つのJSON状態を保存しています。
   const client = requireClient();
   const { data: userData, error: userError } = await client.auth.getUser();
   if (userError || !userData.user) throw new Error("ログインが必要です。");
@@ -43,6 +45,7 @@ export async function loadCloudState(): Promise<AppState | null> {
 }
 
 export async function saveCloudState(state: AppState): Promise<void> {
+  // upsertなので、新規ユーザーなら作成、既存ユーザーなら更新になります。
   const client = requireClient();
   const { data: userData, error: userError } = await client.auth.getUser();
   if (userError || !userData.user) throw new Error("ログインが必要です。");
