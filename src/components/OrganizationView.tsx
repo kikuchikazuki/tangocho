@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import type { AppState, Folder, Page } from "../domain/types";
+import ClassificationReview from "./ClassificationReview";
 
 type Props = {
   state: AppState;
@@ -7,6 +8,7 @@ type Props = {
   onRenameFolder: (folderId: string, name: string) => void;
   onDeleteFolder: (folderId: string) => void;
   onSetPageFolder: (pageId: string, folderId: string | null) => void;
+  onApplyClassification?: (items: Array<{ cardId: string; sourcePageId: string; targetPageId: string }>) => void;
 };
 
 function PageList({ pages, folders, onSetPageFolder }: {
@@ -91,7 +93,7 @@ function FolderSection({ folder, state, onRenameFolder, onDeleteFolder, onSetPag
   );
 }
 
-export default function OrganizationView({ state, onCreateFolder, onRenameFolder, onDeleteFolder, onSetPageFolder }: Props) {
+export default function OrganizationView({ state, onCreateFolder, onRenameFolder, onDeleteFolder, onSetPageFolder, onApplyClassification = () => undefined }: Props) {
   const [newName, setNewName] = useState("");
 
   function create(event: FormEvent) {
@@ -124,6 +126,7 @@ export default function OrganizationView({ state, onCreateFolder, onRenameFolder
         <h3>未分類</h3>
         <PageList pages={state.pages.filter((page) => page.folderId === null)} folders={state.folders} onSetPageFolder={onSetPageFolder} />
       </section>
+      <ClassificationReview state={state} onApply={onApplyClassification} />
     </main>
   );
 }

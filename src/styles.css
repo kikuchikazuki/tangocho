@@ -526,6 +526,21 @@ h1 {
   padding: 0;
   margin: 14px 0 0;
 }
+.classification-review {
+  margin-top: 24px;
+  padding: 18px;
+  background: #fff;
+  border: 1px solid #e4e8f0;
+  border-radius: 16px;
+}
+.classification-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 160px 220px;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #eef1f6;
+}
 .organization-pages li {
   justify-content: space-between;
   border-top: 1px solid #e4e8f0;

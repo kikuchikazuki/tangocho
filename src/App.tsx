@@ -356,6 +356,13 @@ export default function App() {
     setSelected((current) => current.filter((id) => !movingIds.includes(id)));
   }
 
+  function applyClassification(items: Array<{ cardId: string; sourcePageId: string; targetPageId: string }>) {
+    applyLocalState((current) => items.reduce(
+      (next, item) => moveCardBetweenPages(next, item.cardId, item.sourcePageId, item.targetPageId),
+      current,
+    ));
+  }
+
   return (
     <div className="app">
       <header>
@@ -481,6 +488,7 @@ export default function App() {
           onSetPageFolder={(pageId, folderId) =>
             applyLocalState((current) => setPageFolder(current, pageId, folderId))
           }
+          onApplyClassification={applyClassification}
         />
       ) : view === "calendar" ? (
         <CalendarView
