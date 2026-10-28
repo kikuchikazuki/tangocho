@@ -78,6 +78,9 @@ export default function Sidebar({
           <span className="sidebar-icon" aria-hidden="true">⇧</span>{!collapsed && "データを読み込む"}
         </button>
         <input ref={importInput} type="file" accept="application/json" hidden onChange={onImportData} />
+        <button className="sidebar-link" onClick={onSignOut} title="ログアウト">
+          <span className="sidebar-icon" aria-hidden="true">↪</span>{!collapsed && "ログアウト"}
+        </button>
       </nav>
       <div className="sidebar-actions">
         <button className="sidebar-action add" onClick={onAddPage} title="暗記帳を追加">
@@ -88,9 +91,6 @@ export default function Sidebar({
             <span className="sidebar-icon" aria-hidden="true">−</span>{!collapsed && "この暗記帳を削除"}
           </button>
         )}
-        <button className="sidebar-link" onClick={onSignOut} title="ログアウト">
-          <span className="sidebar-icon" aria-hidden="true">↪</span>{!collapsed && "ログアウト"}
-        </button>
       </div>
       <div className="sidebar-groups">
         {folders.map((folder) => {
