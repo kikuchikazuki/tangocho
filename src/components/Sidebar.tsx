@@ -10,6 +10,10 @@ type SidebarProps = {
   onToggleCollapsed: () => void;
   onSelectView: (view: "decks" | "calendar" | "organization") => void;
   onSelectPage: (pageId: string) => void;
+  onAddPage: () => void;
+  onDeletePage: () => void;
+  onSignOut: () => void;
+  canDeletePage: boolean;
 };
 
 export default function Sidebar({
@@ -21,6 +25,10 @@ export default function Sidebar({
   onToggleCollapsed,
   onSelectView,
   onSelectPage,
+  onAddPage,
+  onDeletePage,
+  onSignOut,
+  canDeletePage,
 }: SidebarProps) {
   // フォルダは最初から開き、利用者が必要なグループだけ閉じられます。
   const [closedFolders, setClosedFolders] = useState<string[]>([]);
@@ -59,6 +67,19 @@ export default function Sidebar({
           <span aria-hidden="true">⚙</span>{!collapsed && "整理・管理"}
         </button>
       </nav>
+      <div className="sidebar-actions">
+        <button className="sidebar-action add" onClick={onAddPage} title="暗記帳を追加">
+          <span aria-hidden="true">＋</span>{!collapsed && "暗記帳を追加"}
+        </button>
+        {canDeletePage && (
+          <button className="sidebar-action danger" onClick={onDeletePage} title="この暗記帳を削除">
+            <span aria-hidden="true">−</span>{!collapsed && "この暗記帳を削除"}
+          </button>
+        )}
+        <button className="sidebar-action" onClick={onSignOut} title="ログアウト">
+          <span aria-hidden="true">↪</span>{!collapsed && "ログアウト"}
+        </button>
+      </div>
       <div className="sidebar-groups">
         {folders.map((folder) => {
           const folderPages = pages.filter((page) => page.folderId === folder.id);

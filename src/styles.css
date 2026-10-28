@@ -34,6 +34,11 @@ body {
 }
 .sidebar-toggle { font-size: 24px; padding: 2px 8px; }
 .sidebar-nav { border-bottom: 1px solid #ded8ce; padding-bottom: 10px; margin-bottom: 10px; }
+.sidebar-actions { display: grid; gap: 6px; padding-bottom: 12px; margin-bottom: 10px; border-bottom: 1px solid #ded8ce; }
+.sidebar-action { display: flex; align-items: center; gap: 8px; min-height: 36px; padding: 7px 8px; border: 1px solid #d9deea; border-radius: 8px; background: #fff; color: inherit; cursor: pointer; text-align: left; font: inherit; font-weight: 700; }
+.sidebar-action:hover { background: #ebe5da; }
+.sidebar-action.add { background: #ff5c35; border-color: #ff5c35; color: #fff; }
+.sidebar-action.danger { background: #fff4f1; border-color: #f0b8ad; color: #b42318; }
 .sidebar-link, .sidebar-folder { width: 100%; min-height: 36px; padding: 7px 8px; border-radius: 8px; }
 .sidebar-link:hover, .sidebar-folder:hover, .sidebar-page:hover { background: #ebe5da; }
 .sidebar-link.active, .sidebar-page.active { background: #e2d8c8; font-weight: 700; }

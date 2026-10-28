@@ -375,6 +375,10 @@ export default function App() {
         collapsed={sidebarCollapsed}
         onToggleCollapsed={() => setSidebarCollapsed((current) => !current)}
         onSelectView={setView}
+        onAddPage={addPage}
+        onDeletePage={removePage}
+        onSignOut={() => void supabase?.auth.signOut()}
+        canDeletePage={view !== "organization"}
         onSelectPage={(pageId) => {
           setView("decks");
           setSelected([]);
@@ -389,31 +393,6 @@ export default function App() {
           <div className="count">
             現在 <strong>{page.cards.length}</strong> 問
           </div>
-        </div>
-        <div className="header-actions">
-          <button
-            className={view === "calendar" ? "calendar-nav active" : "calendar-nav"}
-            onClick={() => setView("calendar")}
-          >
-            カレンダー
-          </button>
-          <button
-            className={view === "organization" ? "calendar-nav active" : "calendar-nav"}
-            onClick={() => setView("organization")}
-          >
-            整理・管理
-          </button>
-          <button className="add-page" onClick={addPage}>
-            ＋ 暗記帳を追加
-          </button>
-          {view !== "organization" && (
-            <button className="delete-page" onClick={removePage}>
-              この暗記帳を削除
-            </button>
-          )}
-          <button onClick={() => void supabase?.auth.signOut()}>
-            ログアウト
-          </button>
         </div>
       </header>
       {view !== "organization" && <section className="toolbar">
