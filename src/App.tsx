@@ -50,7 +50,6 @@ export default function App() {
   const [view, setView] = useState<"decks" | "calendar" | "organization">("decks");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [today, setToday] = useState(() => localDateKey(new Date()));
-  const importInput = useRef<HTMLInputElement>(null);
   const localRevision = useRef(0);
   const savedRevision = useRef(0);
   const saveQueue = useRef(Promise.resolve());
@@ -379,6 +378,8 @@ export default function App() {
         onDeletePage={removePage}
         onSignOut={() => void supabase?.auth.signOut()}
         canDeletePage={view !== "organization"}
+        onExportData={exportData}
+        onImportData={importData}
         onSelectPage={(pageId) => {
           setView("decks");
           setSelected([]);
@@ -405,17 +406,6 @@ export default function App() {
         >
           {todayCompleted ? "今日の学習を完了済み" : "今日の学習を完了"}
         </button>
-        <button onClick={exportData}>データを書き出す</button>
-        <button onClick={() => importInput.current?.click()}>
-          データを読み込む
-        </button>
-        <input
-          ref={importInput}
-          type="file"
-          accept="application/json"
-          hidden
-          onChange={importData}
-        />
         <button onClick={() => toggleAll("left")}>左を全部隠す／表示</button>
         <button onClick={() => toggleAll("right")}>右を全部隠す／表示</button>
         <button

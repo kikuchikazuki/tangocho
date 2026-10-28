@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState, type ChangeEvent } from "react";
 import type { Folder, Page } from "../domain/types";
 
 type SidebarProps = {
@@ -14,6 +14,8 @@ type SidebarProps = {
   onDeletePage: () => void;
   onSignOut: () => void;
   canDeletePage: boolean;
+  onExportData: () => void;
+  onImportData: (event: ChangeEvent<HTMLInputElement>) => void;
 };
 
 export default function Sidebar({
@@ -29,7 +31,10 @@ export default function Sidebar({
   onDeletePage,
   onSignOut,
   canDeletePage,
+  onExportData,
+  onImportData,
 }: SidebarProps) {
+  const importInput = useRef<HTMLInputElement>(null);
   // フォルダは最初から開き、利用者が必要なグループだけ閉じられます。
   const [closedFolders, setClosedFolders] = useState<string[]>([]);
   const toggleFolder = (folderId: string) =>
@@ -66,6 +71,13 @@ export default function Sidebar({
         <button className={view === "organization" ? "sidebar-link active" : "sidebar-link"} onClick={() => onSelectView("organization")}>
           <span className="sidebar-icon" aria-hidden="true">⚙</span>{!collapsed && "整理・管理"}
         </button>
+        <button className="sidebar-link" onClick={onExportData}>
+          <span className="sidebar-icon" aria-hidden="true">⇩</span>{!collapsed && "データを書き出す"}
+        </button>
+        <button className="sidebar-link" onClick={() => importInput.current?.click()}>
+          <span className="sidebar-icon" aria-hidden="true">⇧</span>{!collapsed && "データを読み込む"}
+        </button>
+        <input ref={importInput} type="file" accept="application/json" hidden onChange={onImportData} />
       </nav>
       <div className="sidebar-actions">
         <button className="sidebar-action add" onClick={onAddPage} title="暗記帳を追加">
@@ -76,7 +88,7 @@ export default function Sidebar({
             <span className="sidebar-icon" aria-hidden="true">−</span>{!collapsed && "この暗記帳を削除"}
           </button>
         )}
-        <button className="sidebar-action" onClick={onSignOut} title="ログアウト">
+        <button className="sidebar-link" onClick={onSignOut} title="ログアウト">
           <span className="sidebar-icon" aria-hidden="true">↪</span>{!collapsed && "ログアウト"}
         </button>
       </div>
